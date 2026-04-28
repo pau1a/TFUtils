@@ -1,0 +1,108 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-copy">
+        <p class="eyebrow">Fast answers for everyday calculations</p>
+        <h1>Crunching numbers. Cutting fluff.</h1>
+        <p class="hero-text">Technofatty is a growing collection of useful calculators, explainers, and practical tools for everyday decisions.</p>
+        <div class="hero-actions">
+            <a class="button button-primary" href="{% url 'calculators_index' %}">Browse calculators</a>
+            <a class="button button-secondary" href="{% url 'about' %}">Meet Podge</a>
+        </div>
+        <ul class="hero-chips" aria-label="Popular calculator ideas">
+            <li>Mortgage</li>
+            <li>Percentages</li>
+            <li>Dates</li>
+            <li>Conversions</li>
+            <li>Recipes</li>
+        </ul>
+    </div>
+    <div class="hero-art">
+        <img src="{% static 'img/podge.svg' %}" alt="Podge, a compact calculator robot mascot with a friendly face display and rounded keypad body." width="420" height="420">
+        <div class="floating-card float-a">
+            <strong>25%</strong>
+            <span>Pay rise</span>
+        </div>
+        <div class="floating-card float-b">
+            <strong>183 days</strong>
+            <span>Date gap</span>
+        </div>
+        <div class="floating-card float-c">
+            <strong>180°C</strong>
+            <span>Oven conversion</span>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow">Featured tools</p>
+            <h2>Popular calculators</h2>
+        </div>
+        <p>Fast, simple tools for the calculations people actually need.</p>
+    </div>
+    <div class="card-grid">
+        {% for tool in featured_tools %}
+        <article class="card">
+            <p class="card-tag">{{ tool.eyebrow }}</p>
+            <h3>{{ tool.name }}</h3>
+            <p>{{ tool.summary }}</p>
+            <a class="text-link" href="{% url 'calculator_detail' tool.slug %}">Use calculator</a>
+        </article>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="section warm-panel">
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow">Categories</p>
+            <h2>Built to scale beyond one tool</h2>
+        </div>
+        <p>The design system supports category pages, linked explainers, and a growing library of reusable calculators.</p>
+    </div>
+    <div class="category-grid">
+        {% for category in categories %}
+        <a class="category-card" href="{% url 'category_detail' category.slug %}">
+            <strong>{{ category.name }}</strong>
+            <span>{{ category.description }}</span>
+        </a>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="section split-section">
+    <article class="info-panel">
+        <p class="eyebrow">Why Technofatty?</p>
+        <h2>Tool first. Explanation second.</h2>
+        <p>Most calculator sites bury the answer under ads, fluff, and generic copy. Technofatty keeps the tool first, explains the result clearly, and gives you enough context to act.</p>
+    </article>
+    <article class="info-panel mascot-panel">
+        <img src="{% static 'img/logo-mark.svg' %}" alt="" width="82" height="82">
+        <p class="eyebrow">Meet Podge</p>
+        <h2>Compact, cheerful, allergic to waffle.</h2>
+        <p>Podge is the Technofatty number-cruncher: a rounded calculator robot built for clear answers, tidy sums, and practical little moments of help.</p>
+    </article>
+</section>
+
+<section class="section">
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow">Latest guides</p>
+            <h2>Supportive explainers without SEO sludge</h2>
+        </div>
+    </div>
+    <div class="card-grid">
+        {% for guide in guides %}
+        <article class="card">
+            <h3>{{ guide.title }}</h3>
+            <p>{{ guide.summary }}</p>
+            <a class="text-link" href="{% url 'guide_detail' guide.slug %}">Read guide</a>
+        </article>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

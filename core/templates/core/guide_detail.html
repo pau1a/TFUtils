@@ -1,0 +1,17 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<article class="guide-shell">
+    <p class="eyebrow">Guide</p>
+    <h1>{{ guide.title }}</h1>
+    <p class="guide-intro">{{ guide.summary }}</p>
+    <div class="guide-body">
+        <h2>Start with the tool</h2>
+        <p>The calculator should be the first thing users see. Supporting content still matters, but it should explain the answer rather than obstruct it.</p>
+        <h2>Keep the maths readable</h2>
+        <p>Write formulas in plain English, then show one example with real numbers. That is usually enough to build trust without padding the page.</p>
+        <h2>Know when an estimate is only an estimate</h2>
+        <p>Financial, health, legal, and safety-adjacent tools need calm, visible disclaimers. Clear caveats build trust better than fake certainty.</p>
+    </div>
+</article>
+{% endblock %}

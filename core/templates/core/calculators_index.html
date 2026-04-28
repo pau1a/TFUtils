@@ -1,0 +1,22 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<section class="page-hero compact-hero">
+    <p class="eyebrow">Calculator library</p>
+    <h1>{{ page_title }}</h1>
+    <p>{{ page_intro }}</p>
+</section>
+
+<section class="section">
+    <div class="card-grid">
+        {% for tool in featured_tools %}
+        <article class="card">
+            <p class="card-tag">{{ tool.category }}</p>
+            <h2>{{ tool.name }}</h2>
+            <p>{{ tool.summary }}</p>
+            <a class="text-link" href="{% url 'calculator_detail' tool.slug %}">Open tool</a>
+        </article>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

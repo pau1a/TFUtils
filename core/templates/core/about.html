@@ -1,0 +1,28 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="hero-copy">
+        <p class="eyebrow">About Technofatty</p>
+        <h1>Useful tools with a recognisable point of view.</h1>
+        <p>Technofatty is designed as a memorable utility site: fast answers, clear working, strong SEO structure, and a playful but competent brand.</p>
+    </div>
+    <div class="hero-art single-illustration">
+        <img src="{% static 'img/podge.svg' %}" alt="Podge, the compact calculator robot mascot for Technofatty." width="360" height="360">
+    </div>
+</section>
+
+<section class="section split-section">
+    <article class="info-panel">
+        <p class="eyebrow">Meet Podge</p>
+        <h2>Podgius calculans</h2>
+        <p>Podge is a compact calculator robot with a rounded body, keypad front, glowing face display, and teal-orange utility accents. The visual direction is desk gadget, not penguin.</p>
+    </article>
+    <article class="info-panel">
+        <p class="eyebrow">Design goals</p>
+        <h2>Distinct, scalable, fast</h2>
+        <p>The site shell is built to support category pages, calculator templates, guide templates, disclaimers, and future monetisation zones without sliding into clutter.</p>
+    </article>
+</section>
+{% endblock %}

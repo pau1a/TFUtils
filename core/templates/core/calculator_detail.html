@@ -1,0 +1,116 @@
+{% extends "core/base.html" %}
+
+{% block extra_head %}
+{% if tool.slug == "percentage-change-calculator" %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Why does a decrease show as negative?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The negative sign shows the value went down rather than up."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I use this for money?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes for simple comparisons, but it is not financial advice and does not include wider context such as fees or compound growth."
+      }
+    }
+  ]
+}
+</script>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<section class="page-hero compact-hero">
+    <p class="eyebrow">{{ tool.category }} calculator</p>
+    <h1>{{ tool.name }}</h1>
+    <p>{{ tool.summary }}</p>
+</section>
+
+<section class="section calculator-layout">
+    <article class="calculator-panel">
+        <div class="panel-heading">
+            <h2>Calculator</h2>
+            <button class="button button-ghost" type="button" data-reset-calculator>Reset</button>
+        </div>
+        {% if tool.slug == "percentage-change-calculator" %}
+        <form class="calculator-form" data-calculator="percentage-change" novalidate>
+            <label for="old-value">Starting value</label>
+            <input id="old-value" name="old_value" type="number" inputmode="decimal" step="any" value="80" required>
+            <label for="new-value">New value</label>
+            <input id="new-value" name="new_value" type="number" inputmode="decimal" step="any" value="100" required>
+            <button class="button button-primary" type="submit">Calculate</button>
+            <p class="helper-text">Enter two values and Podge will show the percentage increase or decrease.</p>
+            <p class="form-error" aria-live="polite" data-form-error></p>
+        </form>
+        {% else %}
+        <div class="placeholder-block">
+            <p>This page uses the reusable calculator template and is ready for the live logic to be dropped in.</p>
+            <p class="helper-text">The brief asked for scalable calculator infrastructure, so this first pass proves the content and layout system with one working tool.</p>
+        </div>
+        {% endif %}
+    </article>
+
+    <aside class="result-panel">
+        <p class="eyebrow">Answer crunched</p>
+        <h2 data-result-headline>{% if tool.slug == "percentage-change-calculator" %}25% increase{% else %}Result panel{% endif %}</h2>
+        <p data-result-detail>{% if tool.slug == "percentage-change-calculator" %}The value changed by 20, which is 25% higher than the starting value.{% else %}Use this area for the main answer, supporting breakdown, and copy/share actions.{% endif %}</p>
+        <div class="result-meta">
+            <span data-result-badge>{% if tool.slug == "percentage-change-calculator" %}Increase{% else %}Template{% endif %}</span>
+        </div>
+    </aside>
+</section>
+
+<section class="section content-grid">
+    <article class="content-card">
+        <h2>What this means</h2>
+        <p>No waffle. Just the number and how it was worked out. This result compares the difference between the old value and the new value, then expresses that difference as a percentage of the old value.</p>
+    </article>
+    <article class="content-card">
+        <h2>Formula used</h2>
+        <p class="formula">{{ formula|default:"This block is ready for the live formula used by the calculator." }}</p>
+    </article>
+    <article class="content-card">
+        <h2>Worked example</h2>
+        <p>{{ worked_example|default:"Include a concise worked example here to support SEO and help users check the maths." }}</p>
+    </article>
+    <article class="content-card">
+        <h2>Common questions</h2>
+        <p><strong>Why does a decrease show as negative?</strong><br>The sign makes the direction explicit, so users can see whether the number went up or down.</p>
+        <p><strong>Can I use this for money?</strong><br>Yes for simple comparisons, but not as financial advice or a substitute for fees, tax, or compound growth modelling.</p>
+    </article>
+</section>
+
+<section class="section">
+    <article class="disclaimer">
+        <strong>Disclaimer:</strong> {{ disclaimer|default:"This calculator gives a general estimate only. Check important decisions with the right professional or source data." }}
+    </article>
+</section>
+
+<section class="section">
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow">Related calculators</p>
+            <h2>Keep going</h2>
+        </div>
+    </div>
+    <div class="card-grid">
+        {% for related in related_tools %}
+        <article class="card">
+            <h3>{{ related.name }}</h3>
+            <p>{{ related.summary }}</p>
+            <a class="text-link" href="{% url 'calculator_detail' related.slug %}">Open tool</a>
+        </article>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

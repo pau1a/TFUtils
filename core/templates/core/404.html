@@ -1,0 +1,19 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+<section class="page-hero not-found">
+    <div class="hero-copy">
+        <p class="eyebrow">404</p>
+        <h1>Podge checked twice. That page is missing.</h1>
+        <p>The calculator may have moved, the link may be wrong, or this page never existed in the first place.</p>
+        <div class="hero-actions">
+            <a class="button button-primary" href="{% url 'home' %}">Back to homepage</a>
+            <a class="button button-secondary" href="{% url 'calculators_index' %}">Browse calculators</a>
+        </div>
+    </div>
+    <div class="hero-art single-illustration">
+        <img src="{% static 'img/podge.svg' %}" alt="" width="300" height="300">
+    </div>
+</section>
+{% endblock %}
