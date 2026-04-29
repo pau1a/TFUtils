@@ -1,0 +1,46 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<section class="page-hero compact-hero">
+    <p class="eyebrow">Ask Podge</p>
+    <h1>Start with the awkward question, not the category.</h1>
+    <p>Sometimes the easiest way in is to start with the question itself. Podge can point you toward the right instrument from there.</p>
+    <div class="hero-proof">
+        <span>Social situations</span>
+        <span>Money friction</span>
+        <span>Time confusion</span>
+    </div>
+</section>
+
+<section class="section">
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow">Prompt board</p>
+            <h2>Try one of these</h2>
+        </div>
+        <p>Use this page when you know the situation but not yet the name of the instrument that will help.</p>
+    </div>
+    <div class="prompt-grid">
+        {% for prompt in question_prompts %}
+        <a class="prompt-card" href="{{ prompt.href }}">
+            <strong>{{ prompt.question }}</strong>
+            <span>{{ prompt.answer }}</span>
+        </a>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="section split-section">
+    <article class="info-panel">
+        <p class="eyebrow">Featured gauge</p>
+        <h2>Try the message gauge first.</h2>
+        <p>A good example of the broader brief: not just arithmetic, but a clearer view of timing, urgency, and emotional charge.</p>
+        <a class="text-link" href="{% url 'calculator_detail' 'should-i-send-that-message-gauge' %}">Open the gauge</a>
+    </article>
+    <article class="info-panel mascot-panel">
+        <p class="eyebrow">Podge note</p>
+        <h2>Good instruments reduce embarrassment.</h2>
+        <p>Not every answer needs to be perfect. Often the real job is making the variables visible enough that the next move feels less chaotic.</p>
+    </article>
+</section>
+{% endblock %}

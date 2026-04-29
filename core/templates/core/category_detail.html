@@ -13,13 +13,13 @@
         <article class="card">
             <h2>{{ tool.name }}</h2>
             <p>{{ tool.summary }}</p>
-            <a class="text-link" href="{% url 'calculator_detail' tool.slug %}">View tool</a>
+            <a class="text-link" href="{% url 'calculator_detail' tool.slug %}">Open instrument</a>
         </article>
         {% empty %}
         <article class="info-panel">
             <p class="eyebrow">Podge note</p>
-            <h2>More tools incoming</h2>
-            <p>This category is wired up and ready for more calculators as the library grows.</p>
+            <h2>More instruments incoming</h2>
+            <p>This category is wired up and ready for more engines and gauges as the library grows.</p>
         </article>
         {% endfor %}
     </div>

@@ -1,28 +1,22 @@
 {% extends "core/base.html" %}
 
 {% block extra_head %}
-{% if tool.slug == "percentage-change-calculator" %}
+{% if tool.schema_faq %}
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "FAQPage",
   "mainEntity": [
+    {% for item in tool.faq %}
     {
       "@type": "Question",
-      "name": "Why does a decrease show as negative?",
+      "name": "{{ item.question|escapejs }}",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "The negative sign shows the value went down rather than up."
+        "text": "{{ item.answer|escapejs }}"
       }
-    },
-    {
-      "@type": "Question",
-      "name": "Can I use this for money?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes for simple comparisons, but it is not financial advice and does not include wider context such as fees or compound growth."
-      }
-    }
+    }{% if not forloop.last %},{% endif %}
+    {% endfor %}
   ]
 }
 </script>
@@ -31,75 +25,190 @@
 
 {% block content %}
 <section class="page-hero compact-hero">
-    <p class="eyebrow">{{ tool.category }} calculator</p>
+    <p class="eyebrow">{{ tool.category }} instrument</p>
     <h1>{{ tool.name }}</h1>
     <p>{{ tool.summary }}</p>
+    <div class="hero-proof">
+        <span>Instant result</span>
+        <span>Plain-English explanation</span>
+        <span>Formula included</span>
+    </div>
 </section>
 
 <section class="section calculator-layout">
     <article class="calculator-panel">
         <div class="panel-heading">
-            <h2>Calculator</h2>
+            <h2>Instrument</h2>
             <button class="button button-ghost" type="button" data-reset-calculator>Reset</button>
         </div>
-        {% if tool.slug == "percentage-change-calculator" %}
+        {% if tool.calculator_type == "percentage-change" %}
         <form class="calculator-form" data-calculator="percentage-change" novalidate>
             <label for="old-value">Starting value</label>
             <input id="old-value" name="old_value" type="number" inputmode="decimal" step="any" value="80" required>
             <label for="new-value">New value</label>
             <input id="new-value" name="new_value" type="number" inputmode="decimal" step="any" value="100" required>
             <button class="button button-primary" type="submit">Calculate</button>
-            <p class="helper-text">Enter two values and Podge will show the percentage increase or decrease.</p>
+            <p class="helper-text">{{ tool.microcopy }}</p>
+            <p class="form-error" aria-live="polite" data-form-error></p>
+        </form>
+        {% elif tool.calculator_type == "vat" %}
+        <form class="calculator-form" data-calculator="vat" novalidate>
+            <label for="vat-amount">Price</label>
+            <input id="vat-amount" name="amount" type="number" inputmode="decimal" step="any" value="100" required>
+            <label for="vat-rate">VAT rate (%)</label>
+            <input id="vat-rate" name="rate" type="number" inputmode="decimal" step="any" value="20" required>
+            <label for="vat-mode">Price type</label>
+            <select id="vat-mode" name="mode">
+                <option value="add">Price excludes VAT</option>
+                <option value="remove">Price includes VAT</option>
+            </select>
+            <button class="button button-primary" type="submit">Calculate</button>
+            <p class="helper-text">{{ tool.microcopy }}</p>
+            <p class="form-error" aria-live="polite" data-form-error></p>
+        </form>
+        {% elif tool.calculator_type == "room-area" %}
+        <form class="calculator-form" data-calculator="room-area" novalidate>
+            <label for="room-length">Length</label>
+            <input id="room-length" name="length" type="number" inputmode="decimal" step="any" value="5" required>
+            <label for="room-width">Width</label>
+            <input id="room-width" name="width" type="number" inputmode="decimal" step="any" value="4" required>
+            <label for="room-unit">Unit</label>
+            <select id="room-unit" name="unit">
+                <option value="m">Metres</option>
+                <option value="ft">Feet</option>
+            </select>
+            <button class="button button-primary" type="submit">Calculate</button>
+            <p class="helper-text">{{ tool.microcopy }}</p>
+            <p class="form-error" aria-live="polite" data-form-error></p>
+        </form>
+        {% elif tool.calculator_type == "days-between-dates" %}
+        <form class="calculator-form" data-calculator="days-between-dates" novalidate>
+            <label for="start-date">Start date</label>
+            <input id="start-date" name="start_date" type="date" value="2026-01-01" required>
+            <label for="end-date">End date</label>
+            <input id="end-date" name="end_date" type="date" value="2026-07-03" required>
+            <label class="checkbox-row" for="include-both">
+                <input id="include-both" name="include_both" type="checkbox">
+                <span>Include both start and end date</span>
+            </label>
+            <button class="button button-primary" type="submit">Calculate</button>
+            <p class="helper-text">{{ tool.microcopy }}</p>
+            <p class="form-error" aria-live="polite" data-form-error></p>
+        </form>
+        {% elif tool.calculator_type == "send-that-message" %}
+        <form class="calculator-form" data-calculator="send-that-message" novalidate>
+            <label for="message-urgency">How urgent is it? (1-10)</label>
+            <input id="message-urgency" name="urgency" type="number" min="1" max="10" inputmode="numeric" step="1" value="3" required>
+            <label for="message-clarity">How clear is your message? (1-10)</label>
+            <input id="message-clarity" name="clarity" type="number" min="1" max="10" inputmode="numeric" step="1" value="4" required>
+            <label for="message-charge">How emotionally charged are you? (1-10)</label>
+            <input id="message-charge" name="charge" type="number" min="1" max="10" inputmode="numeric" step="1" value="8" required>
+            <label for="message-hour">What time is it? (24h)</label>
+            <input id="message-hour" name="hour" type="number" min="0" max="23" inputmode="numeric" step="1" value="23" required>
+            <button class="button button-primary" type="submit">Gauge the situation</button>
+            <p class="helper-text">{{ tool.microcopy }}</p>
+            <p class="form-error" aria-live="polite" data-form-error></p>
+        </form>
+        {% elif tool.calculator_type == "fancy-version" %}
+        <form class="calculator-form" data-calculator="fancy-version" novalidate>
+            <label for="fancy-use">How often will you use it? (1-10)</label>
+            <input id="fancy-use" name="use" type="number" min="1" max="10" inputmode="numeric" step="1" value="8" required>
+            <label for="fancy-failure">How annoying would failure be? (1-10)</label>
+            <input id="fancy-failure" name="failure" type="number" min="1" max="10" inputmode="numeric" step="1" value="7" required>
+            <label for="fancy-longevity">Does the better one last meaningfully longer? (1-10)</label>
+            <input id="fancy-longevity" name="longevity" type="number" min="1" max="10" inputmode="numeric" step="1" value="6" required>
+            <label for="fancy-joy">How much genuine joy does the nicer one add? (1-10)</label>
+            <input id="fancy-joy" name="joy" type="number" min="1" max="10" inputmode="numeric" step="1" value="7" required>
+            <label for="fancy-pain">How much does the price sting? (1-10)</label>
+            <input id="fancy-pain" name="pain" type="number" min="1" max="10" inputmode="numeric" step="1" value="4" required>
+            <button class="button button-primary" type="submit">Judge the upgrade</button>
+            <p class="helper-text">{{ tool.microcopy }}</p>
             <p class="form-error" aria-live="polite" data-form-error></p>
         </form>
         {% else %}
         <div class="placeholder-block">
-            <p>This page uses the reusable calculator template and is ready for the live logic to be dropped in.</p>
-            <p class="helper-text">The brief asked for scalable calculator infrastructure, so this first pass proves the content and layout system with one working tool.</p>
+            <p>This page uses the reusable instrument template and is ready for the live logic to be dropped in.</p>
+            <p class="helper-text">The system is built to support a growing library of engines, gauges, and practical instruments.</p>
         </div>
         {% endif %}
     </article>
 
     <aside class="result-panel">
         <p class="eyebrow">Answer crunched</p>
-        <h2 data-result-headline>{% if tool.slug == "percentage-change-calculator" %}25% increase{% else %}Result panel{% endif %}</h2>
-        <p data-result-detail>{% if tool.slug == "percentage-change-calculator" %}The value changed by 20, which is 25% higher than the starting value.{% else %}Use this area for the main answer, supporting breakdown, and copy/share actions.{% endif %}</p>
-        <div class="result-meta">
-            <span data-result-badge>{% if tool.slug == "percentage-change-calculator" %}Increase{% else %}Template{% endif %}</span>
+        <div class="result-status">
+            <span class="status-dot" data-status-dot></span>
+            <span data-result-badge>{{ tool.defaults.badge|default:"Template" }}</span>
+            <span data-podge-mood>{{ tool.defaults.mood|default:"Ready for live logic." }}</span>
         </div>
+        <h2 data-result-headline>{{ tool.defaults.headline|default:"Result panel" }}</h2>
+        <p data-result-detail>{{ tool.defaults.detail|default:"Use this area for the main answer, supporting breakdown, and copy/share actions." }}</p>
+        <div class="result-signal-grid">
+            <div>
+                <strong data-result-delta>{{ tool.defaults.signals.0|default:"n/a" }}</strong>
+                <span>{{ tool.result_labels.0|default:"Signal" }}</span>
+            </div>
+            <div>
+                <strong data-result-start>{{ tool.defaults.signals.1|default:"n/a" }}</strong>
+                <span>{{ tool.result_labels.1|default:"Signal" }}</span>
+            </div>
+            <div>
+                <strong data-result-end>{{ tool.defaults.signals.2|default:"n/a" }}</strong>
+                <span>{{ tool.result_labels.2|default:"Signal" }}</span>
+            </div>
+        </div>
+        <article class="verdict-card" data-verdict-card>
+            <p class="eyebrow">Summary</p>
+            <h3 data-verdict-title>{{ tool.defaults.headline|default:"Result panel" }}</h3>
+            <p data-verdict-summary>{{ tool.defaults.summary|default:"The result summary for this instrument will live here." }}</p>
+        </article>
+        <button class="button button-secondary result-copy" type="button" data-copy-result>Copy result summary</button>
+        <p class="helper-text" data-copy-feedback aria-live="polite"></p>
     </aside>
 </section>
 
 <section class="section content-grid">
     <article class="content-card">
         <h2>What this means</h2>
-        <p>No waffle. Just the number and how it was worked out. This result compares the difference between the old value and the new value, then expresses that difference as a percentage of the old value.</p>
+        <p data-result-explainer>{{ tool.defaults.explainer|default:"No waffle. Just the number and how it was worked out." }}</p>
     </article>
     <article class="content-card">
         <h2>Formula used</h2>
-        <p class="formula">{{ formula|default:"This block is ready for the live formula used by the calculator." }}</p>
+        <p class="formula">{{ tool.formula|default:"This block is ready for the live formula used by the calculator." }}</p>
     </article>
     <article class="content-card">
         <h2>Worked example</h2>
-        <p>{{ worked_example|default:"Include a concise worked example here to support SEO and help users check the maths." }}</p>
+        <p>{{ tool.worked_example|default:"Include a concise worked example here to support SEO and help users check the maths." }}</p>
     </article>
     <article class="content-card">
         <h2>Common questions</h2>
-        <p><strong>Why does a decrease show as negative?</strong><br>The sign makes the direction explicit, so users can see whether the number went up or down.</p>
-        <p><strong>Can I use this for money?</strong><br>Yes for simple comparisons, but not as financial advice or a substitute for fees, tax, or compound growth modelling.</p>
+        {% if tool.faq %}
+            {% for item in tool.faq %}
+            <p><strong>{{ item.question }}</strong><br>{{ item.answer }}</p>
+            {% endfor %}
+        {% else %}
+            <p><strong>Will this page support FAQs?</strong><br>Yes. This block is ready for concise questions and answers on every calculator page.</p>
+        {% endif %}
+    </article>
+</section>
+
+<section class="section podge-note">
+    <article class="info-panel">
+        <p class="eyebrow">Plain-English summary</p>
+        <h2 data-podge-summary>{{ tool.defaults.summary|default:"The result summary for this calculator will live here." }}</h2>
+        <p>This section translates the result into a short, direct takeaway rather than leaving the page at a bare number.</p>
     </article>
 </section>
 
 <section class="section">
     <article class="disclaimer">
-        <strong>Disclaimer:</strong> {{ disclaimer|default:"This calculator gives a general estimate only. Check important decisions with the right professional or source data." }}
+        <strong>Disclaimer:</strong> {{ tool.disclaimer|default:"This calculator gives a general estimate only. Check important decisions with the right professional or source data." }}
     </article>
 </section>
 
 <section class="section">
     <div class="section-heading">
         <div>
-            <p class="eyebrow">Related calculators</p>
+            <p class="eyebrow">Related instruments</p>
             <h2>Keep going</h2>
         </div>
     </div>
@@ -108,7 +217,7 @@
         <article class="card">
             <h3>{{ related.name }}</h3>
             <p>{{ related.summary }}</p>
-            <a class="text-link" href="{% url 'calculator_detail' related.slug %}">Open tool</a>
+            <a class="text-link" href="{% url 'calculator_detail' related.slug %}">Open instrument</a>
         </article>
         {% endfor %}
     </div>

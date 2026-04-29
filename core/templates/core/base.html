@@ -31,13 +31,17 @@
                     <small>{{ site_tagline }}</small>
                 </span>
             </a>
-            <nav class="site-nav" aria-label="Primary">
-                <a href="{% url 'calculators_index' %}">Calculators</a>
-                <a href="{% url 'category_detail' 'money' %}">Categories</a>
-                <a href="{% url 'guide_detail' 'how-to-calculate-percentage-change' %}">Guides</a>
-                <a href="{% url 'about' %}">About</a>
-                <a href="{% url 'contact' %}">Contact</a>
-            </nav>
+            <div class="header-actions">
+                <p class="header-kicker">Questions, awkwardly answered.</p>
+                <nav class="site-nav" aria-label="Primary">
+                    <a href="{% url 'calculators_index' %}">Instruments</a>
+                    <a href="{% url 'category_detail' 'money' %}">Categories</a>
+                    <a href="{% url 'guide_detail' 'how-to-calculate-percentage-change' %}">Guides</a>
+                    <a href="{% url 'about' %}">About</a>
+                    <a href="{% url 'contact' %}">Contact</a>
+                    <a class="nav-random" href="{% url 'random_calculator' %}">Random</a>
+                </nav>
+            </div>
         </header>
         <main id="main">
             {% block content %}{% endblock %}
@@ -45,13 +49,13 @@
         <footer class="site-footer">
             <div>
                 <p class="footer-brand">Technofatty</p>
-                <p>Useful calculators, practical explainers, zero waffle.</p>
+                <p>Questions, awkwardly answered through practical instruments and tidy explainers.</p>
             </div>
             <div>
                 <p class="footer-title">Browse</p>
-                <a href="{% url 'calculators_index' %}">All calculators</a>
+                <a href="{% url 'calculators_index' %}">All instruments</a>
                 <a href="{% url 'about' %}">Meet Podge</a>
-                <a href="{% url 'contact' %}">Suggest a tool</a>
+                <a href="{% url 'contact' %}">Suggest an instrument</a>
             </div>
             <div>
                 <p class="footer-title">Legal</p>
