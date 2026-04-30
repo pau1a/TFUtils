@@ -680,6 +680,16 @@ input {
     font: inherit;
 }
 
+textarea {
+    padding: 0.95rem 1rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(47, 54, 59, 0.14);
+    background: rgba(255, 255, 255, 0.92);
+    font: inherit;
+    resize: vertical;
+    min-height: 7rem;
+}
+
 select {
     padding: 0.95rem 1rem;
     border-radius: var(--radius-sm);
@@ -711,6 +721,7 @@ select {
 }
 
 input:focus,
+textarea:focus,
 select:focus,
 .checkbox-row:focus-within,
 .button:focus,

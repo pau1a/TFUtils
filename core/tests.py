@@ -25,7 +25,15 @@ class SiteRoutesTests(TestCase):
             "room-area-calculator",
             "days-between-dates",
             "should-i-send-that-message-gauge",
+            "main-character-risk-calculator",
+            "subscription-shame-index",
+            "vaguepost-decoder",
+            "parent-phone-hypocrisy-meter",
+            "fake-fan-detector",
+            "parental-phone-treaty-generator",
             "fancy-version-justification-engine",
+            "future-embarrassment-gauge",
+            "sale-suspicion-gauge",
         ]
         for slug in slugs:
             with self.subTest(slug=slug):
