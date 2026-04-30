@@ -1,6 +1,31 @@
 # Technofatty Codex VPS Handoff
 
-This document is for a new Codex session running on the VPS. The local repo has been synced to GitHub at `git@github.com:pau1a/TFUtils.git`.
+This document is for a new Codex session working on Technofatty. The repo is synced to GitHub at `git@github.com:pau1a/TFUtils.git`.
+
+## Current Live Baseline
+
+Technofatty is live at:
+
+```text
+https://technofatty.com/
+```
+
+Treat the live VPS deployment as complete baseline state, not as an unfinished setup checklist.
+
+Current deployed shape:
+
+- App path: `/var/www/technofatty/app`
+- Virtualenv: `/var/www/technofatty/venv`
+- Database: PostgreSQL database `technofatty_dev`, user `technofatty`
+- WSGI entrypoint: `/var/www/technofatty/app/wsgi_prod.py`
+- Static root: `/var/www/technofatty/app/staticfiles`
+- Apache vhosts:
+  - `/etc/apache2/sites-available/technofatty.com.conf`
+  - `/etc/apache2/sites-available/technofatty.com-le-ssl.conf`
+- Certbot certificate: `/etc/letsencrypt/live/technofatty.com/`
+- Deployment support commit: `e7ead45 Add VPS Apache and Postgres deployment support`
+
+Do not inspect or change the VPS deployment as if it is incomplete. Future work should preserve this Apache + mod_wsgi + Postgres baseline unless the user explicitly asks to revisit deployment architecture.
 
 ## Project Purpose
 
@@ -158,60 +183,50 @@ The most important implementation files are `core/views.py`, `core/templates/cor
 
 ## Current Local Settings State
 
-`config/settings.py` is still in dev shape:
+`config/settings.py` started in dev shape. The deployment support commit added the VPS-facing support needed for the live Apache/Postgres setup.
 
-- `DEBUG = True`
-- `SECRET_KEY` is hardcoded
-- `ALLOWED_HOSTS = ["localhost", "127.0.0.1", "testserver"]`
-- database is SQLite at `BASE_DIR / "db.sqlite3"`
-- `STATIC_URL = "static/"`
-- `STATICFILES_DIRS = [BASE_DIR / "static"]`
-- no `STATIC_ROOT` yet
-- no Postgres driver dependency yet
-- no Apache-specific deployment config yet
+For local development, keep the project dev-friendly. For the VPS, use the established deployment files and environment expected by:
 
-This is intentional for the current phase. Do not treat the local settings file as production-hardened.
+- `/var/www/technofatty/app/wsgi_prod.py`
+- PostgreSQL `technofatty_dev`
+- static collection into `/var/www/technofatty/app/staticfiles`
 
-## Current Deployment Assumptions
+Do not treat local settings defaults as the final production hardening posture. The live deployment is internet-facing development/review, not a full production hardening pass.
 
-The next session will run on the VPS and should inspect the actual server before changing anything.
+## Current Deployment Baseline
 
-Known assumptions from the conversation:
+Known completed deployment facts:
 
 - The repo is synced to GitHub.
-- The target domain is `technofatty.com`.
+- The live domain is `https://technofatty.com/`.
 - The server uses Apache, not Nginx.
-- The exact Python serving mechanism is unknown and must be checked. It may be `mod_wsgi`, a reverse proxy to another app server, uWSGI, or something else.
-- The app should move to Postgres.
-- This is an internet-facing dev deployment, not full production yet.
+- Django is served through the WSGI entrypoint at `/var/www/technofatty/app/wsgi_prod.py`.
+- The app uses PostgreSQL database `technofatty_dev` with user `technofatty`.
+- Static files are collected to `/var/www/technofatty/app/staticfiles` and served by Apache.
+- HTTPS is in place through Certbot.
+- This is still an internet-facing dev deployment, not full production yet.
 - `DEBUG` can remain on temporarily until the user is ready to tighten it.
-- Secrets can be revisited nearer production, but the deployment shape should make env vars easy.
+- Secrets can be revisited nearer production.
 - The user wants practical cyber hygiene, but not a full production hardening pass yet.
 
 ## Decision: Apache, Not Nginx
 
-Use Apache as the front door because that is what the VPS already uses.
+Use Apache as the front door because that is what the VPS uses.
 
-The likely preferred path is:
+The current path is:
 
 ```text
 Apache + mod_wsgi + Postgres + Django static files served by Apache
 ```
 
-If Apache is already reverse-proxying to another Python app server, preserve the existing pattern if it is sane. Do not switch to Nginx/Gunicorn just because many Django tutorials use that stack.
+Do not switch to Nginx/Gunicorn just because many Django tutorials use that stack.
 
-## Intention To Move To Postgres
+## Database Baseline
 
-The current local project uses SQLite. The VPS deployment should move Django to Postgres.
+The VPS deployment uses PostgreSQL:
 
-Expected work:
-
-- Install/verify Postgres on the VPS.
-- Create a `technofatty` database.
-- Create a dedicated DB user.
-- Add a Postgres Python driver to the repo, likely `psycopg[binary]` or `psycopg2-binary`.
-- Change Django `DATABASES` to support Postgres via environment variables.
-- Run migrations against Postgres on the VPS.
+- Database: `technofatty_dev`
+- User: `technofatty`
 
 Keep the implementation simple. There is currently no data model beyond Django built-ins, so the migration risk is low.
 
@@ -269,7 +284,9 @@ Before public launch, revisit:
 - Apache security headers
 - log rotation and error logging
 
-## Exact Next Steps On The VPS
+## Historical Pre-Deployment Checklist
+
+This section is superseded. It records the checklist that was used before Technofatty went live. Do not treat it as current next steps.
 
 1. SSH into the VPS.
 2. Inspect Apache, Python, Postgres, and vhost state using the commands below.
@@ -291,7 +308,9 @@ Before public launch, revisit:
 18. Test `http://technofatty.com/` externally.
 19. Add HTTPS with the server's existing Certbot/Apache process if present.
 
-## First Commands To Run On The VPS
+## Historical First Commands For Initial VPS Inspection
+
+This section is superseded. These commands were for the initial deployment inspection, not for routine future work.
 
 Run these before changing anything:
 
@@ -363,11 +382,11 @@ certbot --version
 ls -la /etc/letsencrypt/live
 ```
 
-## Likely Apache Shape If mod_wsgi Is Available
+## Historical Apache Shape Used For Planning
 
-If `apachectl -M` shows `wsgi_module`, the deployment can use `config/wsgi.py`.
+This planning section is superseded by the live Apache vhosts listed in Current Live Baseline.
 
-Expected vhost ingredients:
+The original expected vhost ingredients were:
 
 ```apache
 ServerName technofatty.com
@@ -390,22 +409,19 @@ Alias /static/ /srv/technofatty/app/staticfiles/
 </Directory>
 ```
 
-Adjust paths after inspecting the server. Do not assume `/srv/technofatty/app` already exists.
+The live deployment uses `/var/www/technofatty/app`, not `/srv/technofatty/app`.
 
-## Useful Django Commands After Repo Is In Place
+## Useful Django Commands
 
-From the project directory on the VPS:
+From `/var/www/technofatty/app` on the VPS:
 
 ```bash
-python3 -m venv .venv
-.venv/bin/pip install --upgrade pip
-.venv/bin/pip install -r requirements.txt
-.venv/bin/python manage.py check
-.venv/bin/python manage.py migrate
-.venv/bin/python manage.py collectstatic
+/var/www/technofatty/venv/bin/python manage.py check
+/var/www/technofatty/venv/bin/python manage.py migrate
+/var/www/technofatty/venv/bin/python manage.py collectstatic
 ```
 
-If settings have not yet been patched for Postgres, `migrate` will still target SQLite. Patch settings first if the intention is to verify Postgres.
+Use the established VPS environment and `wsgi_prod.py` deployment shape when running deployment checks.
 
 ## Current Local Verification
 
@@ -426,8 +442,9 @@ The most recent direct route checks included:
 
 ## Cautions For The VPS Session
 
-- Inspect before changing Apache. Existing vhosts may matter.
+- Treat the live deployment as baseline.
+- Do not change Apache, Postgres, Certbot, or WSGI setup unless the user asks.
 - Do not assume Nginx or Gunicorn.
 - Do not delete existing Apache configs.
-- Avoid broad production refactors unless needed to get the internet-facing dev site working.
+- Avoid broad production refactors unless needed for a requested change.
 - Keep deployment changes small enough that the site can be debugged with normal Apache, Django, and Postgres logs.
