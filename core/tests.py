@@ -34,6 +34,9 @@ class SiteRoutesTests(TestCase):
             "fancy-version-justification-engine",
             "future-embarrassment-gauge",
             "sale-suspicion-gauge",
+            "astroturf-detector",
+            "algorithm-tax-calculator",
+            "ai-emotional-dependency-gauge",
         ]
         for slug in slugs:
             with self.subTest(slug=slug):

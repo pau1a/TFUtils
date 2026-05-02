@@ -508,6 +508,108 @@ TOOL_REGISTRY = [
         },
         "schema_faq": True,
     },
+    {
+        "name": "Astroturf Detector",
+        "slug": "astroturf-detector",
+        "category": "Tech",
+        "category_slug": "tech",
+        "summary": "Estimate whether a campaign, comment wave, or public outrage looks grassroots or manufactured.",
+        "eyebrow": "Featured",
+        "calculator_type": "astroturf-detector",
+        "microcopy": "Use this when sudden consensus feels a little too tidy, repetitive, or professionally outraged.",
+        "formula": "Astroturf risk = message sameness + account weirdness + timing coordination + funding opacity + outrage velocity",
+        "worked_example": "A normal grassroots wave has messy language, visible context, and varied accounts. A manufactured one often arrives suddenly, repeats the same lines, hides who benefits, and moves faster than ordinary people usually organise.",
+        "disclaimer": "This is a subjective media-literacy detector, not proof of coordination, funding, or misconduct.",
+        "result_labels": ["Astroturf risk", "Message sameness", "Coordination"],
+        "faq": [
+            {
+                "question": "Does a high score prove a campaign is fake?",
+                "answer": "No. It means the visible pattern has enough manufactured-looking signals that it deserves more scepticism before you amplify it.",
+            },
+            {
+                "question": "What makes a movement look astroturfed?",
+                "answer": "Repeated language, brand-new accounts, identical timing, unclear funding, and outrage that appears fully formed before ordinary context catches up.",
+            },
+        ],
+        "defaults": {
+            "headline": "Synthetic grassroots smell detected.",
+            "detail": "The visible pattern looks coordinated enough that you should verify who benefits before treating it as spontaneous public opinion.",
+            "badge": "High suspicion",
+            "mood": "Podge is checking the lawn for plastic seams.",
+            "signals": ["82/100", "8/10", "9/10"],
+            "explainer": "This detector weighs repeated phrasing, account quality, timing, funding clarity, and outrage velocity to separate messy public reaction from something that may be managed.",
+            "summary": "Do not assume the crowd is fake, but do not hand it your trust for free either.",
+        },
+        "schema_faq": True,
+    },
+    {
+        "name": "Algorithm Tax Calculator",
+        "slug": "algorithm-tax-calculator",
+        "category": "Tech",
+        "category_slug": "tech",
+        "summary": "Estimate how much money, time, and attention a platform's recommendations are quietly extracting.",
+        "eyebrow": "Featured",
+        "calculator_type": "algorithm-tax",
+        "microcopy": "Use this when recommendations keep turning boredom into purchases, subscriptions, outrage, or time you did not mean to spend.",
+        "formula": "Algorithm tax = impulse spend + unplanned time cost + subscription creep + attention residue",
+        "worked_example": "A platform that turns ten casual minutes into an hour, a purchase, and a recurring subscription is charging more than the listed price.",
+        "disclaimer": "This is a general attention-and-spending estimate, not financial, psychological, or professional advice.",
+        "result_labels": ["Algorithm tax", "Monthly leakage", "Time cost"],
+        "faq": [
+            {
+                "question": "What counts as algorithm tax?",
+                "answer": "Unplanned purchases, subscriptions, extra platform time, and the mental drag left after recommendation feeds steer your attention.",
+            },
+            {
+                "question": "Is this blaming the algorithm for every choice?",
+                "answer": "No. It is a framing tool for noticing when recommendation systems are repeatedly nudging you into costs you would not choose cold.",
+            },
+        ],
+        "defaults": {
+            "headline": "The feed is taking a cut.",
+            "detail": "Your recommendations are converting attention into enough spend and lost time that the platform is no longer free in any useful sense.",
+            "badge": "Hidden tax",
+            "mood": "Podge has found the receipt inside the scroll.",
+            "signals": ["78/100", "64", "19h"],
+            "explainer": "This calculator combines impulse purchases, recurring costs, unplanned feed time, and attention residue to estimate the hidden cost of recommendation systems.",
+            "summary": "The listed price may be zero, but the algorithm is still collecting payment in money, time, and mood.",
+        },
+        "schema_faq": True,
+    },
+    {
+        "name": "AI Emotional Dependency Gauge",
+        "slug": "ai-emotional-dependency-gauge",
+        "category": "Life",
+        "category_slug": "life",
+        "summary": "Check whether an AI assistant is helping you think or quietly becoming your main emotional outlet.",
+        "eyebrow": "Featured",
+        "calculator_type": "ai-emotional-dependency",
+        "microcopy": "Use this to weigh reassurance loops, disclosure habits, human support, and whether the chat is expanding your life or replacing parts of it.",
+        "formula": "Dependency risk = emotional reliance + reassurance loops + human avoidance + attachment language - offline support",
+        "worked_example": "Using AI to organise thoughts before a difficult conversation is different from using it as the only place you feel understood, especially if it delays talking to real people.",
+        "disclaimer": "This is a subjective wellbeing gauge, not medical, mental health, or crisis advice. If you feel at risk or unable to stay safe, contact local emergency services or a crisis support line.",
+        "result_labels": ["Dependency risk", "Reassurance loop", "Human support"],
+        "faq": [
+            {
+                "question": "Is using AI for emotional support automatically bad?",
+                "answer": "No. The risk rises when it becomes the main or only outlet, replaces human repair, or keeps you cycling through reassurance without action.",
+            },
+            {
+                "question": "What should I do with a high result?",
+                "answer": "Treat it as a prompt to bring at least one trusted human or qualified professional back into the loop, especially for serious distress.",
+            },
+        ],
+        "defaults": {
+            "headline": "The chat is carrying too much.",
+            "detail": "The pattern suggests the assistant may be doing more emotional holding than is healthy for a tool.",
+            "badge": "High reliance",
+            "mood": "Podge recommends bringing a human back into the room.",
+            "signals": ["84/100", "8/10", "3/10"],
+            "explainer": "This gauge looks at how often you seek reassurance, how much you disclose to AI before people, whether it delays real conversations, and how much offline support is still active.",
+            "summary": "The tool may be useful, but it should not become the only place your feelings are allowed to land.",
+        },
+        "schema_faq": True,
+    },
 ]
 
 GUIDES = [
@@ -604,6 +706,21 @@ QUESTION_PROMPTS = [
         "href": "/calculators/sale-suspicion-gauge/",
     },
     {
+        "question": "Is this grassroots or astroturf?",
+        "answer": "Useful when a sudden wave of comments, outrage, or support looks suspiciously coordinated.",
+        "href": "/calculators/astroturf-detector/",
+    },
+    {
+        "question": "What is this algorithm quietly costing me?",
+        "answer": "Useful when recommendations keep converting spare attention into money, time, or mood damage.",
+        "href": "/calculators/algorithm-tax-calculator/",
+    },
+    {
+        "question": "Am I relying on AI too much emotionally?",
+        "answer": "Useful when a helpful chat starts becoming the main place your feelings go.",
+        "href": "/calculators/ai-emotional-dependency-gauge/",
+    },
+    {
         "question": "How big is this room, really?",
         "answer": "Good for paint, flooring, furniture, and fewer trips back to the shop.",
         "href": "/calculators/room-area-calculator/",
@@ -672,7 +789,38 @@ HOUSE_SPECIALS = [
         "slug": "sale-suspicion-gauge",
         "pitch": "A practical way to tell whether a discount is helping you or just hurrying you.",
     },
+    {
+        "name": "Astroturf Detector",
+        "slug": "astroturf-detector",
+        "pitch": "A scepticism check for sudden grassroots-looking campaigns that may be more manufactured than messy.",
+    },
+    {
+        "name": "Algorithm Tax Calculator",
+        "slug": "algorithm-tax-calculator",
+        "pitch": "A cost check for recommendation feeds that quietly turn attention into purchases, subscriptions, and lost time.",
+    },
+    {
+        "name": "AI Emotional Dependency Gauge",
+        "slug": "ai-emotional-dependency-gauge",
+        "pitch": "A wellbeing check for when an AI assistant is helping with feelings but may be replacing human support.",
+    },
 ]
+
+USER_ANSWER_FIRST_TYPES = {
+    "send-that-message",
+    "main-character-risk",
+    "subscription-shame",
+    "vaguepost-decoder",
+    "parent-phone-hypocrisy",
+    "fake-fan-detector",
+    "phone-treaty",
+    "fancy-version",
+    "future-embarrassment",
+    "sale-suspicion",
+    "astroturf-detector",
+    "algorithm-tax",
+    "ai-emotional-dependency",
+}
 
 
 def get_tool(slug):
@@ -744,9 +892,13 @@ def category_detail(request, slug):
 
 
 def calculator_detail(request, slug):
-    tool = get_tool(slug)
-    if not tool:
+    registry_tool = get_tool(slug)
+    if not registry_tool:
         return custom_404(request, None)
+    tool = {
+        **registry_tool,
+        "start_neutral": registry_tool.get("calculator_type") in USER_ANSWER_FIRST_TYPES,
+    }
     context = base_context(
         meta_title=f"{tool['name']} | Technofatty",
         meta_description=tool["summary"],

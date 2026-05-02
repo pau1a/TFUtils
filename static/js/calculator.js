@@ -27,6 +27,38 @@ document.addEventListener("DOMContentLoaded", () => {
     const textareas = Array.from(form.querySelectorAll("textarea"));
     const selectInputs = Array.from(form.querySelectorAll("select"));
     const checkboxInputs = Array.from(form.querySelectorAll('input[type="checkbox"]'));
+    const userAnswerFirstCalculators = new Set([
+        "send-that-message",
+        "main-character-risk",
+        "subscription-shame",
+        "vaguepost-decoder",
+        "parent-phone-hypocrisy",
+        "fake-fan-detector",
+        "phone-treaty",
+        "fancy-version",
+        "future-embarrassment",
+        "sale-suspicion",
+        "astroturf-detector",
+        "algorithm-tax",
+        "ai-emotional-dependency",
+    ]);
+    const needsUserAnswersFirst = userAnswerFirstCalculators.has(calculatorType);
+
+    if (needsUserAnswersFirst) {
+        numberInputs.forEach((input) => {
+            input.value = "";
+        });
+        dateInputs.forEach((input) => {
+            input.value = "";
+        });
+        textareas.forEach((input) => {
+            input.value = "";
+        });
+        checkboxInputs.forEach((input) => {
+            input.checked = false;
+        });
+    }
+
     const initialState = {
         numbers: numberInputs.map((input) => input.value),
         dates: dateInputs.map((input) => input.value),
@@ -68,7 +100,34 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         if (verdictCard && result.verdictTone) {
             verdictCard.dataset.tone = result.verdictTone;
+        } else if (verdictCard) {
+            delete verdictCard.dataset.tone;
         }
+    };
+    const neutralResult = {
+        headline: "Answer a few questions first.",
+        detail: "Your verdict will appear here once the required fields are filled in.",
+        badge: "Waiting",
+        mood: "Podge is ready when you are.",
+        explainer: "This instrument starts blank so it does not judge a made-up example before you have entered your own situation.",
+        summary: "Fill in the questions on the left to generate a verdict card.",
+        signals: ["Waiting", "Not scored", "Ready"],
+    };
+    const showNeutralResult = () => {
+        clearError();
+        setResult(neutralResult);
+    };
+    const hasRequiredInputs = () => {
+        if (needsUserAnswersFirst && textareas.some((input) => input.value.trim() === "")) {
+            return false;
+        }
+        const requiredFields = Array.from(form.querySelectorAll("input[required], textarea[required], select[required]"));
+        return requiredFields.every((input) => {
+            if (input.type === "checkbox") {
+                return true;
+            }
+            return input.value.trim() !== "";
+        });
     };
     const buildCopyText = () => `${headline.textContent}. ${detail.textContent}`;
 
@@ -918,11 +977,225 @@ document.addEventListener("DOMContentLoaded", () => {
                 verdictTone,
             };
         },
+        "astroturf-detector": () => {
+            const topic = form.querySelector("#astro-topic").value;
+            const sameness = Number(form.querySelector("#astro-sameness").value);
+            const accounts = Number(form.querySelector("#astro-accounts").value);
+            const timing = Number(form.querySelector("#astro-timing").value);
+            const fundingClarity = Number(form.querySelector("#astro-funding").value);
+            const sameLinks = form.querySelector("#astro-links").checked;
+            const instantOutrage = form.querySelector("#astro-outrage").checked;
+
+            if (![sameness, accounts, timing, fundingClarity].every(Number.isFinite)) {
+                throw new Error("Enter values for all scored fields.");
+            }
+            if ([sameness, accounts, timing, fundingClarity].some((value) => value < 1 || value > 10)) {
+                throw new Error("Use scores from 1 to 10 for every factor.");
+            }
+
+            const topicRiskMap = {
+                brand: 6,
+                politics: 9,
+                local: 7,
+                product: 6,
+                culture: 8,
+                workplace: 7,
+            };
+            const opacity = 10 - fundingClarity;
+            const coordination = Math.min(10, Math.max(1, Math.round((timing + sameness + (sameLinks ? 3 : 0) + (instantOutrage ? 2 : 0)) / 2.4)));
+            const score = Math.min(
+                100,
+                Math.max(
+                    0,
+                    Math.round(
+                        (sameness * 8)
+                        + (accounts * 6)
+                        + (timing * 7)
+                        + (opacity * 5)
+                        + topicRiskMap[topic]
+                        + (sameLinks ? 9 : 0)
+                        + (instantOutrage ? 8 : 0)
+                        - 25
+                    )
+                )
+            );
+
+            let headlineText = "Possibly organic, still worth checking.";
+            let badgeText = "Mixed turf";
+            let moodText = "Podge is not calling it either way yet.";
+            let summaryText = "There are some coordinated-looking signals, but not enough to assume the whole thing is manufactured.";
+            let verdictTone = "amber";
+
+            if (score <= 35) {
+                headlineText = "Looks messy enough to be real.";
+                badgeText = "Low suspicion";
+                moodText = "Podge sees ordinary chaos rather than a managed lawn.";
+                summaryText = "The pattern looks varied enough that it may be genuine public reaction, though normal verification still applies.";
+                verdictTone = "green";
+            } else if (score >= 75) {
+                headlineText = "Synthetic grassroots smell detected.";
+                badgeText = "High suspicion";
+                moodText = "Podge recommends verifying who benefits before amplifying.";
+                summaryText = "This may still involve real people, but the visible pattern looks coordinated enough to withhold trust.";
+                verdictTone = "red";
+            }
+
+            return {
+                headline: headlineText,
+                detail: `Astroturf risk is ${score}/100, message sameness is ${sameness}/10, and coordination is ${coordination}/10.`,
+                badge: badgeText,
+                mood: moodText,
+                explainer: "This detector weighs repeated language, account weirdness, timing, funding opacity, and whether the same calls to action keep appearing everywhere.",
+                summary: summaryText,
+                signals: [`${score}/100`, `${sameness}/10`, `${coordination}/10`],
+                verdictTone,
+            };
+        },
+        "algorithm-tax": () => {
+            const platform = form.querySelector("#tax-platform").value;
+            const minutes = Number(form.querySelector("#tax-minutes").value);
+            const spend = Number(form.querySelector("#tax-spend").value);
+            const subscriptions = Number(form.querySelector("#tax-subs").value);
+            const residue = Number(form.querySelector("#tax-residue").value);
+            const regret = form.querySelector("#tax-regret").checked;
+
+            if (![minutes, spend, subscriptions, residue].every(Number.isFinite)) {
+                throw new Error("Enter values for all scored fields.");
+            }
+            if (minutes < 0 || minutes > 600 || spend < 0 || subscriptions < 0) {
+                throw new Error("Check the minutes, spend, and subscription values.");
+            }
+            if (residue < 1 || residue > 10) {
+                throw new Error("Use an attention residue score from 1 to 10.");
+            }
+
+            const platformDragMap = {
+                tiktok: 10,
+                instagram: 8,
+                youtube: 7,
+                amazon: 8,
+                x: 9,
+                news: 7,
+            };
+            const monthlyHours = (minutes * 30) / 60;
+            const monthlyLeakage = spend + (subscriptions * 9.99);
+            const score = Math.min(
+                100,
+                Math.max(
+                    0,
+                    Math.round(
+                        (monthlyHours * 1.6)
+                        + (monthlyLeakage * 0.7)
+                        + (residue * 5)
+                        + platformDragMap[platform]
+                        + (regret ? 12 : 0)
+                    )
+                )
+            );
+
+            let headlineText = "The feed is taking a cut.";
+            let badgeText = "Hidden tax";
+            let moodText = "Podge has found the receipt inside the scroll.";
+            let summaryText = "The listed price may be zero, but the recommendations are still collecting payment in money, time, and mood.";
+            let verdictTone = "amber";
+
+            if (score <= 35) {
+                headlineText = "The tax looks manageable.";
+                badgeText = "Low drag";
+                moodText = "Podge sees a feed that has not fully captured the budget.";
+                summaryText = "The feed still costs attention, but the current money and time leakage looks relatively contained.";
+                verdictTone = "green";
+            } else if (score >= 75) {
+                headlineText = "The algorithm is billing you.";
+                badgeText = "High tax";
+                moodText = "Podge recommends closing the till for a bit.";
+                summaryText = "The recommendations are converting enough attention into spending, subscriptions, and lost time that the hidden cost is no longer subtle.";
+                verdictTone = "red";
+            }
+
+            return {
+                headline: headlineText,
+                detail: `Algorithm tax is ${score}/100, estimated monthly leakage is ${format(monthlyLeakage)}, and unplanned feed time is ${format(monthlyHours)} hours per month.`,
+                badge: badgeText,
+                mood: moodText,
+                explainer: "This calculator treats recommendation feeds as a cost centre by adding unplanned time, impulse spend, subscription nudges, and the residue they leave behind.",
+                summary: summaryText,
+                signals: [`${score}/100`, format(monthlyLeakage), `${format(monthlyHours)}h`],
+                verdictTone,
+            };
+        },
+        "ai-emotional-dependency": () => {
+            const frequency = Number(form.querySelector("#ai-frequency").value);
+            const loop = Number(form.querySelector("#ai-loop").value);
+            const support = Number(form.querySelector("#ai-support").value);
+            const avoidance = Number(form.querySelector("#ai-avoidance").value);
+            const onlyUnderstood = form.querySelector("#ai-only-understood").checked;
+            const secret = form.querySelector("#ai-secret").checked;
+
+            if (![frequency, loop, support, avoidance].every(Number.isFinite)) {
+                throw new Error("Enter values for all scored fields.");
+            }
+            if ([frequency, loop, support, avoidance].some((value) => value < 1 || value > 10)) {
+                throw new Error("Use scores from 1 to 10 for every factor.");
+            }
+
+            const reassuranceLoop = Math.min(10, Math.max(1, Math.round((loop + frequency + (onlyUnderstood ? 2 : 0)) / 2.2)));
+            const score = Math.min(
+                100,
+                Math.max(
+                    0,
+                    Math.round(
+                        (frequency * 8)
+                        + (loop * 7)
+                        + (avoidance * 7)
+                        + ((10 - support) * 6)
+                        + (onlyUnderstood ? 12 : 0)
+                        + (secret ? 10 : 0)
+                        - 35
+                    )
+                )
+            );
+
+            let headlineText = "Useful, but watch the balance.";
+            let badgeText = "Mixed reliance";
+            let moodText = "Podge recommends keeping humans in the loop.";
+            let summaryText = "The assistant may be helping, but the pattern is close enough to dependence that offline support should stay active.";
+            let verdictTone = "amber";
+
+            if (score <= 35) {
+                headlineText = "Support tool, not substitute.";
+                badgeText = "Balanced use";
+                moodText = "Podge sees the tool staying in its lane.";
+                summaryText = "You appear to be using AI as a thinking aid rather than letting it replace your wider support system.";
+                verdictTone = "green";
+            } else if (score >= 75) {
+                headlineText = "The chat is carrying too much.";
+                badgeText = "High reliance";
+                moodText = "Podge recommends bringing a human back into the room.";
+                summaryText = "The tool may be useful, but it should not become the only place your feelings are allowed to land.";
+                verdictTone = "red";
+            }
+
+            return {
+                headline: headlineText,
+                detail: `Dependency risk is ${score}/100, reassurance loop strength is ${reassuranceLoop}/10, and offline human support is ${support}/10.`,
+                badge: badgeText,
+                mood: moodText,
+                explainer: "This gauge weighs emotional frequency, repeated reassurance seeking, avoidance of real conversations, attachment language, disclosure habits, and the amount of offline support still present.",
+                summary: summaryText,
+                signals: [`${score}/100`, `${reassuranceLoop}/10`, `${support}/10`],
+                verdictTone,
+            };
+        },
     };
 
     const updateResult = () => {
         const calculator = calculators[calculatorType];
         if (!calculator) {
+            return;
+        }
+        if (needsUserAnswersFirst && !hasRequiredInputs()) {
+            showNeutralResult();
             return;
         }
         clearError();
@@ -971,6 +1244,10 @@ document.addEventListener("DOMContentLoaded", () => {
             input.checked = initialState.checks[index];
         });
         copyFeedback.textContent = "";
+        if (needsUserAnswersFirst) {
+            showNeutralResult();
+            return;
+        }
         try {
             updateResult();
         } catch (errorObject) {
@@ -987,9 +1264,13 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    try {
-        updateResult();
-    } catch (errorObject) {
-        setError(errorObject.message || "Something went wrong.");
+    if (needsUserAnswersFirst) {
+        showNeutralResult();
+    } else {
+        try {
+            updateResult();
+        } catch (errorObject) {
+            setError(errorObject.message || "Something went wrong.");
+        }
     }
 });

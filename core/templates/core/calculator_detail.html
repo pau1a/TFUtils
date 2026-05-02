@@ -98,7 +98,7 @@
         {% elif tool.calculator_type == "send-that-message" %}
         <form class="calculator-form" data-calculator="send-that-message" novalidate>
             <label for="message-text">Message</label>
-            <textarea id="message-text" name="message_text" rows="5">I just think it's interesting that you had time to reply to everyone else.</textarea>
+            <textarea id="message-text" name="message_text" rows="5"></textarea>
             <label for="message-recipient">Who is it for?</label>
             <select id="message-recipient" name="recipient">
                 <option value="partner">Partner</option>
@@ -120,15 +120,15 @@
                 <option value="pretend-fine">Pretend I'm fine</option>
             </select>
             <label for="message-emotion">How emotional are you right now? (1-10)</label>
-            <input id="message-emotion" name="emotion" type="number" min="1" max="10" inputmode="numeric" step="1" value="8" required>
+            <input id="message-emotion" name="emotion" type="number" min="1" max="10" inputmode="numeric" step="1" required>
             <label for="message-reply-gap">How many hours since they last replied?</label>
-            <input id="message-reply-gap" name="reply_gap" type="number" min="0" inputmode="numeric" step="1" value="18" required>
+            <input id="message-reply-gap" name="reply_gap" type="number" min="0" inputmode="numeric" step="1" required>
             <label class="checkbox-row" for="message-reread">
-                <input id="message-reread" name="reread" type="checkbox" checked>
+                <input id="message-reread" name="reread" type="checkbox">
                 <span>I have reread this more than three times</span>
             </label>
             <label class="checkbox-row" for="message-screenshot">
-                <input id="message-screenshot" name="screenshot_risk" type="checkbox" checked>
+                <input id="message-screenshot" name="screenshot_risk" type="checkbox">
                 <span>I would be embarrassed if this was screenshotted</span>
             </label>
             <button class="button button-primary" type="submit">Check sendability</button>
@@ -138,7 +138,7 @@
         {% elif tool.calculator_type == "main-character-risk" %}
         <form class="calculator-form" data-calculator="main-character-risk" novalidate>
             <label for="main-involvement">How directly does this involve you? (1-10)</label>
-            <input id="main-involvement" name="involvement" type="number" min="1" max="10" inputmode="numeric" step="1" value="3" required>
+            <input id="main-involvement" name="involvement" type="number" min="1" max="10" inputmode="numeric" step="1" required>
             <label for="main-posting">Are you about to post about it?</label>
             <select id="main-posting" name="posting">
                 <option value="no">No</option>
@@ -146,19 +146,19 @@
                 <option value="public">Yes, publicly</option>
             </select>
             <label class="checkbox-row" for="main-as-someone">
-                <input id="main-as-someone" name="as_someone" type="checkbox" checked>
+                <input id="main-as-someone" name="as_someone" type="checkbox">
                 <span>I am about to use "as someone who..." language</span>
             </label>
             <label class="checkbox-row" for="main-surprised">
-                <input id="main-surprised" name="surprised" type="checkbox" checked>
+                <input id="main-surprised" name="surprised" type="checkbox">
                 <span>The person most affected would be surprised to see my take on this</span>
             </label>
             <label class="checkbox-row" for="main-praise">
-                <input id="main-praise" name="praise" type="checkbox" checked>
+                <input id="main-praise" name="praise" type="checkbox">
                 <span>I may be hoping people praise my emotional intelligence or sensitivity</span>
             </label>
             <label for="main-self-focus">How much are you adding your own story to this? (1-10)</label>
-            <input id="main-self-focus" name="self_focus" type="number" min="1" max="10" inputmode="numeric" step="1" value="8" required>
+            <input id="main-self-focus" name="self_focus" type="number" min="1" max="10" inputmode="numeric" step="1" required>
             <button class="button button-primary" type="submit">Check the risk</button>
             <p class="helper-text">{{ tool.microcopy }}</p>
             <p class="form-error" aria-live="polite" data-form-error></p>
@@ -166,17 +166,17 @@
         {% elif tool.calculator_type == "subscription-shame" %}
         <form class="calculator-form" data-calculator="subscription-shame" novalidate>
             <label for="subs-monthly">Monthly subscriptions (£)</label>
-            <input id="subs-monthly" name="monthly_cost" type="number" min="0" inputmode="decimal" step="any" value="48" required>
+            <input id="subs-monthly" name="monthly_cost" type="number" min="0" inputmode="decimal" step="any" required>
             <label for="subs-annual">Annual subscriptions (£)</label>
-            <input id="subs-annual" name="annual_cost" type="number" min="0" inputmode="decimal" step="any" value="180" required>
+            <input id="subs-annual" name="annual_cost" type="number" min="0" inputmode="decimal" step="any" required>
             <label for="subs-unused">Unused services in the last 30 days</label>
-            <input id="subs-unused" name="unused_count" type="number" min="0" inputmode="numeric" step="1" value="5" required>
+            <input id="subs-unused" name="unused_count" type="number" min="0" inputmode="numeric" step="1" required>
             <label for="subs-duplicates">Duplicate household subscriptions</label>
-            <input id="subs-duplicates" name="duplicate_count" type="number" min="0" inputmode="numeric" step="1" value="2" required>
+            <input id="subs-duplicates" name="duplicate_count" type="number" min="0" inputmode="numeric" step="1" required>
             <label for="subs-regret">How many would you sign up to again today?</label>
-            <input id="subs-regret" name="renew_today" type="number" min="0" inputmode="numeric" step="1" value="4" required>
+            <input id="subs-regret" name="renew_today" type="number" min="0" inputmode="numeric" step="1" required>
             <label class="checkbox-row" for="subs-forgotten">
-                <input id="subs-forgotten" name="forgotten_trial" type="checkbox" checked>
+                <input id="subs-forgotten" name="forgotten_trial" type="checkbox">
                 <span>There is at least one service I forgot was still renewing</span>
             </label>
             <button class="button button-primary" type="submit">Check the stack</button>
@@ -186,7 +186,7 @@
         {% elif tool.calculator_type == "vaguepost-decoder" %}
         <form class="calculator-form" data-calculator="vaguepost-decoder" novalidate>
             <label for="vaguepost-text">Paste the post</label>
-            <textarea id="vaguepost-text" name="post_text" rows="5">Funny how people show you exactly who they are when you stop over-explaining. New chapter. Protect your peace.</textarea>
+            <textarea id="vaguepost-text" name="post_text" rows="5"></textarea>
             <label for="vaguepost-platform">Platform</label>
             <select id="vaguepost-platform" name="platform">
                 <option value="facebook">Facebook</option>
@@ -207,9 +207,9 @@
                 <option value="barely-know">Someone I barely know but I am invested</option>
             </select>
             <label for="vaguepost-phrases">How many stock vaguepost phrases does it contain?</label>
-            <input id="vaguepost-phrases" name="phrase_count" type="number" min="0" max="12" inputmode="numeric" step="1" value="4" required>
+            <input id="vaguepost-phrases" name="phrase_count" type="number" min="0" max="12" inputmode="numeric" step="1" required>
             <label for="vaguepost-info">How much actual information does it contain? (1-10)</label>
-            <input id="vaguepost-info" name="info_level" type="number" min="1" max="10" inputmode="numeric" step="1" value="2" required>
+            <input id="vaguepost-info" name="info_level" type="number" min="1" max="10" inputmode="numeric" step="1" required>
             <label for="vaguepost-timing">When was it posted?</label>
             <select id="vaguepost-timing" name="timing">
                 <option value="morning">Morning</option>
@@ -219,11 +219,11 @@
                 <option value="announcement-adjacent">Suspiciously close to someone else's announcement</option>
             </select>
             <label class="checkbox-row" for="vaguepost-dm">
-                <input id="vaguepost-dm" name="dm_me" type="checkbox" checked>
+                <input id="vaguepost-dm" name="dm_me" type="checkbox">
                 <span>The poster is likely to reply with some form of “DM me”</span>
             </label>
             <label class="checkbox-row" for="vaguepost-not-naming">
-                <input id="vaguepost-not-naming" name="not_naming" type="checkbox" checked>
+                <input id="vaguepost-not-naming" name="not_naming" type="checkbox">
                 <span>It includes “not naming names”, “you know who you are”, or similar bait</span>
             </label>
             <button class="button button-primary" type="submit">Decode the vaguepost</button>
@@ -233,31 +233,31 @@
         {% elif tool.calculator_type == "parent-phone-hypocrisy" %}
         <form class="calculator-form" data-calculator="parent-phone-hypocrisy" novalidate>
             <label for="parent-screen-time">Parent daily phone screen time (hours)</label>
-            <input id="parent-screen-time" name="parent_screen_time" type="number" min="0" max="18" inputmode="decimal" step="any" value="5.5" required>
+            <input id="parent-screen-time" name="parent_screen_time" type="number" min="0" max="18" inputmode="decimal" step="any" required>
             <label for="parent-unlocks">Pointless parent unlocks per day</label>
-            <input id="parent-unlocks" name="parent_unlocks" type="number" min="0" max="400" inputmode="numeric" step="1" value="72" required>
+            <input id="parent-unlocks" name="parent_unlocks" type="number" min="0" max="400" inputmode="numeric" step="1" required>
             <label class="checkbox-row" for="parent-bed">
-                <input id="parent-bed" name="parent_bed" type="checkbox" checked>
+                <input id="parent-bed" name="parent_bed" type="checkbox">
                 <span>Parent uses the phone in bed</span>
             </label>
             <label class="checkbox-row" for="parent-convo">
-                <input id="parent-convo" name="parent_convo" type="checkbox" checked>
+                <input id="parent-convo" name="parent_convo" type="checkbox">
                 <span>Parent checks the phone during conversations with the child</span>
             </label>
             <label class="checkbox-row" for="parent-minute">
-                <input id="parent-minute" name="parent_minute" type="checkbox" checked>
+                <input id="parent-minute" name="parent_minute" type="checkbox">
                 <span>Parent says “just a minute” while already holding the phone</span>
             </label>
             <label class="checkbox-row" for="parent-doom">
-                <input id="parent-doom" name="parent_doom" type="checkbox" checked>
+                <input id="parent-doom" name="parent_doom" type="checkbox">
                 <span>Parent doomscrolls news or social media</span>
             </label>
             <label for="child-age-hypocrisy">Child age</label>
-            <input id="child-age-hypocrisy" name="child_age" type="number" min="5" max="17" inputmode="numeric" step="1" value="12" required>
+            <input id="child-age-hypocrisy" name="child_age" type="number" min="5" max="17" inputmode="numeric" step="1" required>
             <label for="child-screen-hypocrisy">Child daily screen time (hours)</label>
-            <input id="child-screen-hypocrisy" name="child_screen_time" type="number" min="0" max="18" inputmode="decimal" step="any" value="6" required>
+            <input id="child-screen-hypocrisy" name="child_screen_time" type="number" min="0" max="18" inputmode="decimal" step="any" required>
             <label for="child-impact-hypocrisy">How much is the phone affecting homework, sleep, or mood? (1-10)</label>
-            <input id="child-impact-hypocrisy" name="child_impact" type="number" min="1" max="10" inputmode="numeric" step="1" value="7" required>
+            <input id="child-impact-hypocrisy" name="child_impact" type="number" min="1" max="10" inputmode="numeric" step="1" required>
             <button class="button button-primary" type="submit">Check the hypocrisy</button>
             <p class="helper-text">{{ tool.microcopy }}</p>
             <p class="form-error" aria-live="polite" data-form-error></p>
@@ -275,19 +275,19 @@
                 <option value="news">News / press</option>
             </select>
             <label for="fan-everywhere">Did it appear everywhere at once? (1-10)</label>
-            <input id="fan-everywhere" name="everywhere" type="number" min="1" max="10" inputmode="numeric" step="1" value="8" required>
+            <input id="fan-everywhere" name="everywhere" type="number" min="1" max="10" inputmode="numeric" step="1" required>
             <label for="fan-comments">How similar do the comments feel? (1-10)</label>
-            <input id="fan-comments" name="comments" type="number" min="1" max="10" inputmode="numeric" step="1" value="7" required>
+            <input id="fan-comments" name="comments" type="number" min="1" max="10" inputmode="numeric" step="1" required>
             <label class="checkbox-row" for="fan-authentic">
-                <input id="fan-authentic" name="authenticity" type="checkbox" checked>
+                <input id="fan-authentic" name="authenticity" type="checkbox">
                 <span>The hype keeps insisting how authentic and organic it is</span>
             </label>
             <label class="checkbox-row" for="fan-scripted">
-                <input id="fan-scripted" name="scripted" type="checkbox" checked>
+                <input id="fan-scripted" name="scripted" type="checkbox">
                 <span>Different people are using suspiciously similar phrasing</span>
             </label>
             <label class="checkbox-row" for="fan-explain">
-                <input id="fan-explain" name="explain" type="checkbox" checked>
+                <input id="fan-explain" name="explain" type="checkbox">
                 <span>The "fans" sound like they are explaining why this matters, not just enjoying it</span>
             </label>
             <button class="button button-primary" type="submit">Check the hype</button>
@@ -297,9 +297,9 @@
         {% elif tool.calculator_type == "phone-treaty" %}
         <form class="calculator-form" data-calculator="phone-treaty" novalidate>
             <label for="treaty-age">Child age</label>
-            <input id="treaty-age" name="age" type="number" min="5" max="17" inputmode="numeric" step="1" value="13" required>
+            <input id="treaty-age" name="age" type="number" min="5" max="17" inputmode="numeric" step="1" required>
             <label for="treaty-screen">Current daily screen time (hours)</label>
-            <input id="treaty-screen" name="screen_time" type="number" min="0" max="18" inputmode="decimal" step="any" value="5" required>
+            <input id="treaty-screen" name="screen_time" type="number" min="0" max="18" inputmode="decimal" step="any" required>
             <label for="treaty-worry">Biggest parent worry</label>
             <select id="treaty-worry" name="worry">
                 <option value="sleep">Sleep</option>
@@ -310,15 +310,15 @@
                 <option value="privacy">Privacy</option>
             </select>
             <label for="treaty-enforcement">Parent enforcement capacity (1-10)</label>
-            <input id="treaty-enforcement" name="enforcement" type="number" min="1" max="10" inputmode="numeric" step="1" value="4" required>
+            <input id="treaty-enforcement" name="enforcement" type="number" min="1" max="10" inputmode="numeric" step="1" required>
             <label for="treaty-apps">How many high-friction apps are in use?</label>
-            <input id="treaty-apps" name="apps" type="number" min="0" max="12" inputmode="numeric" step="1" value="4" required>
+            <input id="treaty-apps" name="apps" type="number" min="0" max="12" inputmode="numeric" step="1" required>
             <label class="checkbox-row" for="treaty-friends">
-                <input id="treaty-friends" name="friends_on_apps" type="checkbox" checked>
+                <input id="treaty-friends" name="friends_on_apps" type="checkbox">
                 <span>Most of their friends are already on the apps</span>
             </label>
             <label class="checkbox-row" for="treaty-bedroom">
-                <input id="treaty-bedroom" name="bedroom_phone" type="checkbox" checked>
+                <input id="treaty-bedroom" name="bedroom_phone" type="checkbox">
                 <span>The phone currently goes into the bedroom overnight</span>
             </label>
             <button class="button button-primary" type="submit">Generate treaty</button>
@@ -328,15 +328,15 @@
         {% elif tool.calculator_type == "fancy-version" %}
         <form class="calculator-form" data-calculator="fancy-version" novalidate>
             <label for="fancy-use">How often will you use it? (1-10)</label>
-            <input id="fancy-use" name="use" type="number" min="1" max="10" inputmode="numeric" step="1" value="8" required>
+            <input id="fancy-use" name="use" type="number" min="1" max="10" inputmode="numeric" step="1" required>
             <label for="fancy-failure">How annoying would failure be? (1-10)</label>
-            <input id="fancy-failure" name="failure" type="number" min="1" max="10" inputmode="numeric" step="1" value="7" required>
+            <input id="fancy-failure" name="failure" type="number" min="1" max="10" inputmode="numeric" step="1" required>
             <label for="fancy-longevity">Does the better one last meaningfully longer? (1-10)</label>
-            <input id="fancy-longevity" name="longevity" type="number" min="1" max="10" inputmode="numeric" step="1" value="6" required>
+            <input id="fancy-longevity" name="longevity" type="number" min="1" max="10" inputmode="numeric" step="1" required>
             <label for="fancy-joy">How much genuine joy does the nicer one add? (1-10)</label>
-            <input id="fancy-joy" name="joy" type="number" min="1" max="10" inputmode="numeric" step="1" value="7" required>
+            <input id="fancy-joy" name="joy" type="number" min="1" max="10" inputmode="numeric" step="1" required>
             <label for="fancy-pain">How much does the price sting? (1-10)</label>
-            <input id="fancy-pain" name="pain" type="number" min="1" max="10" inputmode="numeric" step="1" value="4" required>
+            <input id="fancy-pain" name="pain" type="number" min="1" max="10" inputmode="numeric" step="1" required>
             <button class="button button-primary" type="submit">Judge the upgrade</button>
             <p class="helper-text">{{ tool.microcopy }}</p>
             <p class="form-error" aria-live="polite" data-form-error></p>
@@ -353,7 +353,7 @@
                 <option value="personal">Personal</option>
             </select>
             <label for="post-emotion">Emotional state (1-10)</label>
-            <input id="post-emotion" name="emotion" type="number" min="1" max="10" inputmode="numeric" step="1" value="8" required>
+            <input id="post-emotion" name="emotion" type="number" min="1" max="10" inputmode="numeric" step="1" required>
             <label for="post-audience">Audience</label>
             <select id="post-audience" name="audience">
                 <option value="close-friends">Close friends</option>
@@ -362,7 +362,7 @@
                 <option value="work">Professional / work</option>
             </select>
             <label class="checkbox-row" for="post-private">
-                <input id="post-private" name="private_context" type="checkbox" checked>
+                <input id="post-private" name="private_context" type="checkbox">
                 <span>Includes private details, screenshots, names, or personal context</span>
             </label>
             <label class="checkbox-row" for="post-future">
@@ -384,15 +384,15 @@
         {% elif tool.calculator_type == "sale-suspicion" %}
         <form class="calculator-form" data-calculator="sale-suspicion" novalidate>
             <label for="sale-original">Original price</label>
-            <input id="sale-original" name="original_price" type="number" min="0" inputmode="decimal" step="any" value="120" required>
+            <input id="sale-original" name="original_price" type="number" min="0" inputmode="decimal" step="any" required>
             <label for="sale-price">Sale price</label>
-            <input id="sale-price" name="sale_price" type="number" min="0" inputmode="decimal" step="any" value="84" required>
+            <input id="sale-price" name="sale_price" type="number" min="0" inputmode="decimal" step="any" required>
             <label for="sale-intent">Were you already going to buy it? (1-10)</label>
-            <input id="sale-intent" name="intent" type="number" min="1" max="10" inputmode="numeric" step="1" value="4" required>
+            <input id="sale-intent" name="intent" type="number" min="1" max="10" inputmode="numeric" step="1" required>
             <label for="sale-elsewhere">Is it clearly cheaper elsewhere? (1-10)</label>
-            <input id="sale-elsewhere" name="elsewhere" type="number" min="1" max="10" inputmode="numeric" step="1" value="3" required>
+            <input id="sale-elsewhere" name="elsewhere" type="number" min="1" max="10" inputmode="numeric" step="1" required>
             <label for="sale-clutter">Will it replace something useful or just add clutter? (1-10)</label>
-            <input id="sale-clutter" name="clutter" type="number" min="1" max="10" inputmode="numeric" step="1" value="7" required>
+            <input id="sale-clutter" name="clutter" type="number" min="1" max="10" inputmode="numeric" step="1" required>
             <label for="sale-category">Category</label>
             <select id="sale-category" name="category">
                 <option value="tech">Tech</option>
@@ -403,6 +403,86 @@
                 <option value="impulse">Impulse item</option>
             </select>
             <button class="button button-primary" type="submit">Check the discount</button>
+            <p class="helper-text">{{ tool.microcopy }}</p>
+            <p class="form-error" aria-live="polite" data-form-error></p>
+        </form>
+        {% elif tool.calculator_type == "astroturf-detector" %}
+        <form class="calculator-form" data-calculator="astroturf-detector" novalidate>
+            <label for="astro-topic">What kind of wave is this?</label>
+            <select id="astro-topic" name="topic">
+                <option value="brand">Brand praise</option>
+                <option value="politics">Political message</option>
+                <option value="local">Local outrage</option>
+                <option value="product">Product hype</option>
+                <option value="culture">Culture-war flare-up</option>
+                <option value="workplace">Workplace / industry discourse</option>
+            </select>
+            <label for="astro-sameness">How identical is the wording? (1-10)</label>
+            <input id="astro-sameness" name="sameness" type="number" min="1" max="10" inputmode="numeric" step="1" required>
+            <label for="astro-accounts">How strange or new do the accounts look? (1-10)</label>
+            <input id="astro-accounts" name="accounts" type="number" min="1" max="10" inputmode="numeric" step="1" required>
+            <label for="astro-timing">How coordinated is the timing? (1-10)</label>
+            <input id="astro-timing" name="timing" type="number" min="1" max="10" inputmode="numeric" step="1" required>
+            <label for="astro-funding">How clear is who benefits or funded it? (1-10)</label>
+            <input id="astro-funding" name="funding" type="number" min="1" max="10" inputmode="numeric" step="1" required>
+            <label class="checkbox-row" for="astro-links">
+                <input id="astro-links" name="same_links" type="checkbox">
+                <span>Posts keep using the same link, slogan, or call to action</span>
+            </label>
+            <label class="checkbox-row" for="astro-outrage">
+                <input id="astro-outrage" name="instant_outrage" type="checkbox">
+                <span>The outrage appeared fully formed before much context existed</span>
+            </label>
+            <button class="button button-primary" type="submit">Check the turf</button>
+            <p class="helper-text">{{ tool.microcopy }}</p>
+            <p class="form-error" aria-live="polite" data-form-error></p>
+        </form>
+        {% elif tool.calculator_type == "algorithm-tax" %}
+        <form class="calculator-form" data-calculator="algorithm-tax" novalidate>
+            <label for="tax-platform">Which feed is charging rent?</label>
+            <select id="tax-platform" name="platform">
+                <option value="tiktok">TikTok</option>
+                <option value="instagram">Instagram</option>
+                <option value="youtube">YouTube</option>
+                <option value="amazon">Shopping recommendations</option>
+                <option value="x">X / Twitter</option>
+                <option value="news">News feed</option>
+            </select>
+            <label for="tax-minutes">Unplanned feed minutes per day</label>
+            <input id="tax-minutes" name="minutes" type="number" min="0" max="600" inputmode="numeric" step="1" required>
+            <label for="tax-spend">Impulse spend caused by recommendations this month</label>
+            <input id="tax-spend" name="spend" type="number" min="0" inputmode="decimal" step="any" required>
+            <label for="tax-subs">New or retained subscriptions nudged by the feed</label>
+            <input id="tax-subs" name="subscriptions" type="number" min="0" max="20" inputmode="numeric" step="1" required>
+            <label for="tax-residue">Attention residue after using it (1-10)</label>
+            <input id="tax-residue" name="residue" type="number" min="1" max="10" inputmode="numeric" step="1" required>
+            <label class="checkbox-row" for="tax-regret">
+                <input id="tax-regret" name="regret" type="checkbox">
+                <span>I often close it feeling worse, poorer, or weirdly activated</span>
+            </label>
+            <button class="button button-primary" type="submit">Calculate the tax</button>
+            <p class="helper-text">{{ tool.microcopy }}</p>
+            <p class="form-error" aria-live="polite" data-form-error></p>
+        </form>
+        {% elif tool.calculator_type == "ai-emotional-dependency" %}
+        <form class="calculator-form" data-calculator="ai-emotional-dependency" novalidate>
+            <label for="ai-frequency">How often do you use AI for emotional reassurance? (1-10)</label>
+            <input id="ai-frequency" name="frequency" type="number" min="1" max="10" inputmode="numeric" step="1" required>
+            <label for="ai-loop">How often do you ask the same feeling-question repeatedly? (1-10)</label>
+            <input id="ai-loop" name="loop" type="number" min="1" max="10" inputmode="numeric" step="1" required>
+            <label for="ai-support">How much human support is active offline? (1-10)</label>
+            <input id="ai-support" name="support" type="number" min="1" max="10" inputmode="numeric" step="1" required>
+            <label for="ai-avoidance">How much does the chat delay real conversations? (1-10)</label>
+            <input id="ai-avoidance" name="avoidance" type="number" min="1" max="10" inputmode="numeric" step="1" required>
+            <label class="checkbox-row" for="ai-only-understood">
+                <input id="ai-only-understood" name="only_understood" type="checkbox">
+                <span>I sometimes feel the AI is the only place I am properly understood</span>
+            </label>
+            <label class="checkbox-row" for="ai-secret">
+                <input id="ai-secret" name="secret" type="checkbox">
+                <span>I disclose things to AI that I am avoiding telling anyone else</span>
+            </label>
+            <button class="button button-primary" type="submit">Check reliance</button>
             <p class="helper-text">{{ tool.microcopy }}</p>
             <p class="form-error" aria-live="polite" data-form-error></p>
         </form>
@@ -418,29 +498,29 @@
         <p class="eyebrow">Answer crunched</p>
         <div class="result-status">
             <span class="status-dot" data-status-dot></span>
-            <span data-result-badge>{{ tool.defaults.badge|default:"Template" }}</span>
-            <span data-podge-mood>{{ tool.defaults.mood|default:"Ready for live logic." }}</span>
+            <span data-result-badge>{% if tool.start_neutral %}Waiting{% else %}{{ tool.defaults.badge|default:"Template" }}{% endif %}</span>
+            <span data-podge-mood>{% if tool.start_neutral %}Podge is ready when you are.{% else %}{{ tool.defaults.mood|default:"Ready for live logic." }}{% endif %}</span>
         </div>
-        <h2 data-result-headline>{{ tool.defaults.headline|default:"Result panel" }}</h2>
-        <p data-result-detail>{{ tool.defaults.detail|default:"Use this area for the main answer, supporting breakdown, and copy/share actions." }}</p>
+        <h2 data-result-headline>{% if tool.start_neutral %}Answer a few questions first.{% else %}{{ tool.defaults.headline|default:"Result panel" }}{% endif %}</h2>
+        <p data-result-detail>{% if tool.start_neutral %}Your verdict will appear here once the required fields are filled in.{% else %}{{ tool.defaults.detail|default:"Use this area for the main answer, supporting breakdown, and copy/share actions." }}{% endif %}</p>
         <div class="result-signal-grid">
             <div>
-                <strong data-result-delta>{{ tool.defaults.signals.0|default:"n/a" }}</strong>
+                <strong data-result-delta>{% if tool.start_neutral %}Waiting{% else %}{{ tool.defaults.signals.0|default:"n/a" }}{% endif %}</strong>
                 <span>{{ tool.result_labels.0|default:"Signal" }}</span>
             </div>
             <div>
-                <strong data-result-start>{{ tool.defaults.signals.1|default:"n/a" }}</strong>
+                <strong data-result-start>{% if tool.start_neutral %}Not scored{% else %}{{ tool.defaults.signals.1|default:"n/a" }}{% endif %}</strong>
                 <span>{{ tool.result_labels.1|default:"Signal" }}</span>
             </div>
             <div>
-                <strong data-result-end>{{ tool.defaults.signals.2|default:"n/a" }}</strong>
+                <strong data-result-end>{% if tool.start_neutral %}Ready{% else %}{{ tool.defaults.signals.2|default:"n/a" }}{% endif %}</strong>
                 <span>{{ tool.result_labels.2|default:"Signal" }}</span>
             </div>
         </div>
         <article class="verdict-card" data-verdict-card>
             <p class="eyebrow">Summary</p>
-            <h3 data-verdict-title>{{ tool.defaults.headline|default:"Result panel" }}</h3>
-            <p data-verdict-summary>{{ tool.defaults.summary|default:"The result summary for this instrument will live here." }}</p>
+            <h3 data-verdict-title>{% if tool.start_neutral %}Answer a few questions first.{% else %}{{ tool.defaults.headline|default:"Result panel" }}{% endif %}</h3>
+            <p data-verdict-summary>{% if tool.start_neutral %}Fill in the questions on the left to generate a verdict card.{% else %}{{ tool.defaults.summary|default:"The result summary for this instrument will live here." }}{% endif %}</p>
         </article>
         <button class="button button-secondary result-copy" type="button" data-copy-result>Copy result summary</button>
         <p class="helper-text" data-copy-feedback aria-live="polite"></p>
@@ -450,7 +530,7 @@
 <section class="section content-grid">
     <article class="content-card">
         <h2>What this means</h2>
-        <p data-result-explainer>{{ tool.defaults.explainer|default:"No waffle. Just the number and how it was worked out." }}</p>
+        <p data-result-explainer>{% if tool.start_neutral %}This instrument starts blank so it does not judge a made-up example before you have entered your own situation.{% else %}{{ tool.defaults.explainer|default:"No waffle. Just the number and how it was worked out." }}{% endif %}</p>
     </article>
     <article class="content-card">
         <h2>Formula used</h2>
@@ -475,7 +555,7 @@
 <section class="section podge-note">
     <article class="info-panel">
         <p class="eyebrow">Plain-English summary</p>
-        <h2 data-podge-summary>{{ tool.defaults.summary|default:"The result summary for this calculator will live here." }}</h2>
+        <h2 data-podge-summary>{% if tool.start_neutral %}Fill in the questions on the left to generate a verdict card.{% else %}{{ tool.defaults.summary|default:"The result summary for this calculator will live here." }}{% endif %}</h2>
         <p>This section translates the result into a short, direct takeaway rather than leaving the page at a bare number.</p>
     </article>
 </section>
