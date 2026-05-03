@@ -37,6 +37,7 @@ class SiteRoutesTests(TestCase):
             "astroturf-detector",
             "algorithm-tax-calculator",
             "ai-emotional-dependency-gauge",
+            "should-i-be-proud-of-this-plate",
         ]
         for slug in slugs:
             with self.subTest(slug=slug):
@@ -53,3 +54,31 @@ class SiteRoutesTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "VAT Engine")
         self.assertContains(response, "Percentage Change Engine")
+        self.assertContains(response, "What this category does")
+
+    def test_calculators_index_shows_newer_live_tools(self):
+        response = self.client.get(reverse("calculators_index"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Should I Be Proud Of This Plate?")
+        self.assertContains(response, "AI Emotional Dependency Gauge")
+
+    def test_new_guide_pages_have_real_sections(self):
+        response = self.client.get(reverse("guide_detail", args=["how-to-spot-fake-hype-online"]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Real excitement is usually messier")
+        self.assertContains(response, "Fake Fan Detector")
+
+    def test_robots_and_sitemap_load(self):
+        robots = self.client.get(reverse("robots_txt"))
+        self.assertEqual(robots.status_code, 200)
+        self.assertContains(robots, "Sitemap: https://technofatty.com/sitemap.xml")
+
+        ads = self.client.get(reverse("ads_txt"))
+        self.assertEqual(ads.status_code, 200)
+        self.assertContains(ads, "real publisher ID")
+
+        sitemap = self.client.get(reverse("sitemap_xml"))
+        self.assertEqual(sitemap.status_code, 200)
+        self.assertContains(sitemap, "https://technofatty.com/calculators/should-i-be-proud-of-this-plate/")
+        self.assertContains(sitemap, "https://technofatty.com/guides/how-to-spot-fake-hype-online/")
+        self.assertContains(sitemap, "https://technofatty.com/privacy/")

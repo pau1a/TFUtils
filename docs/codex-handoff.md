@@ -100,6 +100,35 @@ The application is registry-driven. `core/views.py` contains `TOOL_REGISTRY`, ca
 
 There are no database-backed content models yet. `core/models.py` is currently empty apart from the generated app scaffold. Most content is static Python dictionaries in `core/views.py`.
 
+## Verdict Engine Interaction Rule
+
+Verdict engines and gauges should not calculate a first result from arbitrary demo values. This applies to current and future social, behavioural, purchase, AI, internet, and awkward-life instruments.
+
+Use this pattern:
+
+- start with blank user-controlled inputs
+- render the result panel in a neutral waiting state
+- require the main button press for the first verdict
+- after the first successful verdict, allow edits to live-update the result
+- reset returns the tool to blank inputs, neutral result state, and no live updates until the next button press
+
+Straight practical calculators may still use harmless example defaults and immediate live updates where that makes the arithmetic easier to understand. Examples include percentage change, VAT, room area, and days between dates.
+
+## Share Copy Rule
+
+Every copied result should work as a shareable Technofatty artifact, not as raw UI text. It must include the result, enough context to understand it, and a link back to the current tool so other people can get their own result.
+
+The generic share builder in `static/js/calculator.js` should:
+
+- prefer explicit result fields when present: `shareTitle`, `shareMetric`, `shareWhy`, and `shareNext`
+- fall back gracefully to `headline`, signal labels/values, `summary`, and `detail`
+- normalize punctuation so copied text does not produce doubled full stops
+- use the page canonical URL when available, with `window.location.href` as fallback
+- format verdict engines as `Technofatty verdict`
+- format practical calculators as `Technofatty result`
+
+Future verdict engines should define `shareNext` whenever possible, because a useful next action makes the copied verdict more sendable and more likely to bring someone back to the tool.
+
 ## Calculators And Verdict Engines Added So Far
 
 Live instrument slugs currently covered by tests:
@@ -119,6 +148,10 @@ parental-phone-treaty-generator
 fancy-version-justification-engine
 future-embarrassment-gauge
 sale-suspicion-gauge
+astroturf-detector
+algorithm-tax-calculator
+ai-emotional-dependency-gauge
+should-i-be-proud-of-this-plate
 ```
 
 Notable verdict-style instruments:
@@ -133,6 +166,10 @@ Notable verdict-style instruments:
 - `Fancy Version Justification Engine`
 - `Future Embarrassment Gauge`
 - `Sale Suspicion Gauge`
+- `Astroturf Detector`
+- `Algorithm Tax Calculator`
+- `AI Emotional Dependency Gauge`
+- `Should I Be Proud Of This Plate?`
 
 Template-ready placeholders also exist in the registry:
 

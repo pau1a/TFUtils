@@ -6,12 +6,34 @@
     <h1>{{ guide.title }}</h1>
     <p class="guide-intro">{{ guide.summary }}</p>
     <div class="guide-body">
-        <h2>Start with the tool</h2>
-        <p>The instrument should be the first thing users see. Supporting content still matters, but it should explain the answer rather than obstruct it.</p>
-        <h2>Keep the maths readable</h2>
-        <p>Write formulas in plain English, then show one example with real numbers. That is usually enough to build trust without padding the page.</p>
-        <h2>Know when an estimate is only an estimate</h2>
-        <p>Financial, health, legal, and safety-adjacent instruments need calm, visible disclaimers. Clear caveats build trust better than fake certainty.</p>
+        {% for section in guide.sections %}
+        <h2>{{ section.heading }}</h2>
+        <p>{{ section.body }}</p>
+        {% endfor %}
     </div>
 </article>
+
+{% include "core/partials/ad_slot.html" with slot="guide-mid" %}
+
+{% if related_tools %}
+<section class="section">
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow">Related instruments</p>
+            <h2>Try the tool version</h2>
+        </div>
+        <p>Guides are useful, but the instrument is where Podge turns the idea into a result.</p>
+    </div>
+    <div class="card-grid">
+        {% for tool in related_tools %}
+        <article class="card">
+            <p class="card-tag">{{ tool.category }}</p>
+            <h3>{{ tool.name }}</h3>
+            <p>{{ tool.summary }}</p>
+            <a class="text-link" href="{% url 'calculator_detail' tool.slug %}">Open instrument</a>
+        </article>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
 {% endblock %}

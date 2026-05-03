@@ -486,10 +486,120 @@
             <p class="helper-text">{{ tool.microcopy }}</p>
             <p class="form-error" aria-live="polite" data-form-error></p>
         </form>
+        {% elif tool.calculator_type == "plate-pride" %}
+        <form class="calculator-form" data-calculator="plate-pride" novalidate>
+            <label for="plate-description">Describe the plate-shaped incident</label>
+            <textarea id="plate-description" name="meal_description" rows="5" required></textarea>
+            <label for="plate-lens">Which health lens is judging dinner?</label>
+            <select id="plate-lens" name="condition_lens">
+                <option value="general">General balanced eating</option>
+                <option value="blood-sugar">Blood sugar / diabetes-aware</option>
+                <option value="blood-pressure">High blood pressure / lower sodium</option>
+                <option value="cholesterol">Cholesterol / heart-health</option>
+                <option value="reflux">Reflux-sensitive</option>
+                <option value="ibs">IBS-sensitive</option>
+                <option value="coeliac">Gluten-free / coeliac-aware</option>
+                <option value="lactose">Lactose intolerance</option>
+                <option value="gout">Gout-aware</option>
+                <option value="kidney">Kidney-conscious</option>
+            </select>
+            <label for="plate-size">How large was the situation?</label>
+            <select id="plate-size" name="meal_size">
+                <option value="snack">Snack</option>
+                <option value="light">Light meal</option>
+                <option value="normal">Normal meal</option>
+                <option value="big">Big plate</option>
+                <option value="grazing">Grazing event</option>
+                <option value="refuse">I refuse to answer</option>
+            </select>
+            <label for="plate-protein">Did protein bother attending?</label>
+            <select id="plate-protein" name="protein">
+                <option value="none">No obvious protein</option>
+                <option value="little">A little</option>
+                <option value="decent">Decent amount</option>
+                <option value="carried">Protein carried the plate</option>
+            </select>
+            <label for="plate-plants">Did plants make an appearance?</label>
+            <select id="plate-plants" name="plants">
+                <option value="none">No plants were harmed</option>
+                <option value="token">Token garnish</option>
+                <option value="some">Some fruit/veg</option>
+                <option value="respectable">A respectable showing</option>
+                <option value="victory">Plant kingdom victory</option>
+            </select>
+            <label for="plate-carbs">What sort of carb admin happened?</label>
+            <select id="plate-carbs" name="carbs">
+                <option value="low">Not much carb</option>
+                <option value="wholegrain">Wholegrain/starchy but sensible</option>
+                <option value="refined">Refined carb base</option>
+                <option value="sugary">Sugary carb chaos</option>
+                <option value="mixed">Mixed / unclear</option>
+            </select>
+            <label for="plate-salt">How salty or processed is the suspect?</label>
+            <select id="plate-salt" name="salt">
+                <option value="fresh">Mostly fresh / low salt</option>
+                <option value="some">Some salty bits</option>
+                <option value="processed">Processed or takeaway energy</option>
+                <option value="goblin">Salt goblin behaviour</option>
+            </select>
+            <label for="plate-sugar">Any sugar side-quest?</label>
+            <select id="plate-sugar" name="sugar">
+                <option value="none">No</option>
+                <option value="small">Small sweet thing</option>
+                <option value="drink">Sugary drink</option>
+                <option value="dessert">Dessert happened</option>
+                <option value="subplot">Sugar had a subplot</option>
+            </select>
+            <label for="plate-richness">Fried, creamy, spicy, or rich nonsense?</label>
+            <select id="plate-richness" name="richness">
+                <option value="none">Not really</option>
+                <option value="rich">A bit rich</option>
+                <option value="fried">Fried</option>
+                <option value="creamy">Creamy/dairy-heavy</option>
+                <option value="spicy">Spicy</option>
+                <option value="chaos">Several of the above, because chaos</option>
+            </select>
+            <label for="plate-trigger">Known personal trigger lurking?</label>
+            <input id="plate-trigger" name="known_trigger" type="text" placeholder="Optional: onion, milk, gluten, tomato, beer...">
+            <label for="plate-pattern">Was this a one-off or a lifestyle confession?</label>
+            <select id="plate-pattern" name="pattern">
+                <option value="one-off">One-off</option>
+                <option value="sometimes">Happens sometimes</option>
+                <option value="regular">Regular pattern</option>
+                <option value="dont-ask">Don't ask</option>
+            </select>
+            <label class="checkbox-row" for="plate-alcohol">
+                <input id="plate-alcohol" name="alcohol" type="checkbox">
+                <span>Contains alcohol</span>
+            </label>
+            <label class="checkbox-row" for="plate-dairy">
+                <input id="plate-dairy" name="dairy" type="checkbox">
+                <span>Contains obvious dairy</span>
+            </label>
+            <label class="checkbox-row" for="plate-gluten">
+                <input id="plate-gluten" name="gluten" type="checkbox">
+                <span>Contains gluten / possible gluten</span>
+            </label>
+            <label class="checkbox-row" for="plate-takeaway">
+                <input id="plate-takeaway" name="takeaway" type="checkbox">
+                <span>Takeaway / restaurant meal</span>
+            </label>
+            <label class="checkbox-row" for="plate-unknown">
+                <input id="plate-unknown" name="unknown" type="checkbox">
+                <span>Label or ingredients are unknown</span>
+            </label>
+            <label class="checkbox-row" for="plate-clinician">
+                <input id="plate-clinician" name="clinician_plan" type="checkbox">
+                <span>I am following clinician/dietitian advice for this condition</span>
+            </label>
+            <button class="button button-primary" type="submit">Judge the plate</button>
+            <p class="helper-text">{{ tool.microcopy }}</p>
+            <p class="form-error" aria-live="polite" data-form-error></p>
+        </form>
         {% else %}
         <div class="placeholder-block">
-            <p>This page uses the reusable instrument template and is ready for the live logic to be dropped in.</p>
-            <p class="helper-text">The system is built to support a growing library of engines, gauges, and practical instruments.</p>
+            <p>This instrument is not live yet.</p>
+            <p class="helper-text">Browse the live instrument library for tools that are ready to use.</p>
         </div>
         {% endif %}
     </article>
@@ -498,7 +608,7 @@
         <p class="eyebrow">Answer crunched</p>
         <div class="result-status">
             <span class="status-dot" data-status-dot></span>
-            <span data-result-badge>{% if tool.start_neutral %}Waiting{% else %}{{ tool.defaults.badge|default:"Template" }}{% endif %}</span>
+            <span data-result-badge>{% if tool.start_neutral %}Waiting{% else %}{{ tool.defaults.badge|default:"Ready" }}{% endif %}</span>
             <span data-podge-mood>{% if tool.start_neutral %}Podge is ready when you are.{% else %}{{ tool.defaults.mood|default:"Ready for live logic." }}{% endif %}</span>
         </div>
         <h2 data-result-headline>{% if tool.start_neutral %}Answer a few questions first.{% else %}{{ tool.defaults.headline|default:"Result panel" }}{% endif %}</h2>
@@ -527,6 +637,8 @@
     </aside>
 </section>
 
+{% include "core/partials/ad_slot.html" with slot="tool-after-result" %}
+
 <section class="section content-grid">
     <article class="content-card">
         <h2>What this means</h2>
@@ -552,6 +664,8 @@
     </article>
 </section>
 
+{% include "core/partials/ad_slot.html" with slot="tool-mid-content" %}
+
 <section class="section podge-note">
     <article class="info-panel">
         <p class="eyebrow">Plain-English summary</p>
@@ -559,6 +673,8 @@
         <p>This section translates the result into a short, direct takeaway rather than leaving the page at a bare number.</p>
     </article>
 </section>
+
+{% include "core/partials/ad_slot.html" with slot="tool-before-related" %}
 
 <section class="section">
     <article class="disclaimer">

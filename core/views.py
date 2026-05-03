@@ -1,10 +1,14 @@
 import random
 
+from django.http import HttpResponse
 from django.shortcuts import redirect, render
+from django.urls import reverse
 
 
 SITE_NAME = "Technofatty"
 SITE_TAGLINE = "Questions, awkwardly answered."
+SITE_DOMAIN = "https://technofatty.com"
+CONTACT_EMAIL = "hello@technofatty.com"
 
 CATEGORIES = [
     {"name": "Money", "slug": "money", "description": "Everyday money instruments for pay, tax, comparisons, and practical trade-offs."},
@@ -15,6 +19,72 @@ CATEGORIES = [
     {"name": "Tech", "slug": "tech", "description": "Conversions, speed checks, and other compact instruments for technical odd jobs."},
     {"name": "Life", "slug": "life", "description": "Guidance instruments for timing, trade-offs, and other less tidy real-life questions."},
 ]
+
+CATEGORY_CONTENT = {
+    "money": {
+        "intro": "Money tools on Technofatty focus on small decisions that become expensive when nobody gives them a shape: subscriptions, sales, VAT, percentage changes, and purchase justifications.",
+        "use_cases": [
+            "Check whether a discount is doing real work or just creating urgency.",
+            "Separate recurring costs from the fog of direct debits.",
+            "Compare price changes and tax-inclusive totals without spreadsheet theatre.",
+        ],
+        "reading": "Use these tools as framing aids, not financial advice. A result can show where the pressure is coming from, but it cannot know your whole budget, tax position, or future plans.",
+    },
+    "health": {
+        "intro": "Health instruments here are broad flag checks. They are useful for noticing obvious dietary or behaviour patterns, but they do not diagnose, prescribe, or replace qualified advice.",
+        "use_cases": [
+            "Put a meal under a specific dietary lens without pretending to know exact nutrition.",
+            "Separate green flags from watch-outs such as salt, lactose, gluten, reflux triggers, or sugar-heavy choices.",
+            "Use plain-English caution where a condition needs clinician or dietitian input.",
+        ],
+        "reading": "For medical conditions, allergies, pregnancy, medication interactions, eating disorder history, or clinician-prescribed plans, follow qualified advice over Technofatty verdicts.",
+    },
+    "life": {
+        "intro": "Life tools handle the messy human questions that are too awkward for a normal calculator: messages, posts, family phone rules, social judgement, and whether your reaction has become the event.",
+        "use_cases": [
+            "Pause before sending or posting something with screenshot risk.",
+            "Turn vague household or social conflict into a clearer verdict and next move.",
+            "Get a shareable card for a familiar modern problem without pretending the tool knows every detail.",
+        ],
+        "reading": "These are judgement aids, not relationship, safeguarding, legal, or mental health advice. The useful bit is often the pause they create.",
+    },
+    "tech": {
+        "intro": "Tech tools focus on the internet's less obvious costs: synthetic hype, recommendation feeds, attention traps, and enthusiasm that may have arrived with a media plan.",
+        "use_cases": [
+            "Check whether hype looks organic or suspiciously coordinated.",
+            "Estimate the hidden cost of recommendation feeds in money, time, and mood.",
+            "Treat online patterns as evidence to inspect, not proof to overclaim.",
+        ],
+        "reading": "These tools are media-literacy prompts. They do not prove fraud, coordination, bot activity, or intent.",
+    },
+    "home": {
+        "intro": "Home instruments keep practical jobs moving: measuring rooms, estimating areas, and turning vague DIY questions into usable numbers.",
+        "use_cases": [
+            "Work out floor area before buying materials.",
+            "Keep measurements clear enough to compare options.",
+            "Remember that awkward rooms, waste, and offcuts still need real-world allowance.",
+        ],
+        "reading": "Use the results as planning estimates. Measure twice before spending money on materials.",
+    },
+    "time": {
+        "intro": "Time instruments make date gaps and scheduling questions easier to read without calendar wrangling.",
+        "use_cases": [
+            "Count days between dates.",
+            "Use inclusive or non-inclusive counts depending on the situation.",
+            "Turn date gaps into plain language for planning.",
+        ],
+        "reading": "These are calendar-day tools. Working days, time zones, holidays, and deadlines may need extra checks.",
+    },
+    "food": {
+        "intro": "Food tools are for kitchen maths and meal judgement: scaling, swapping, and checking what a plate is probably doing.",
+        "use_cases": [
+            "Scale cooking decisions without mental arithmetic.",
+            "Inspect a meal under a chosen dietary lens.",
+            "Separate one meal from a pattern without turning dinner into a morality play.",
+        ],
+        "reading": "Food tools use broad signals. Labels, allergies, clinical diets, and personal tolerance still matter.",
+    },
+}
 
 TOOL_REGISTRY = [
     {
@@ -156,7 +226,7 @@ TOOL_REGISTRY = [
         "category": "Food",
         "category_slug": "food",
         "summary": "Scale ingredients up or down without mental arithmetic.",
-        "eyebrow": "Template-ready",
+        "eyebrow": "Queued",
         "calculator_type": "placeholder",
     },
     {
@@ -165,7 +235,7 @@ TOOL_REGISTRY = [
         "category": "Health",
         "category_slug": "health",
         "summary": "Get a quick hydration estimate with a sensible disclaimer.",
-        "eyebrow": "Template-ready",
+        "eyebrow": "Queued",
         "calculator_type": "placeholder",
     },
     {
@@ -610,23 +680,184 @@ TOOL_REGISTRY = [
         },
         "schema_faq": True,
     },
+    {
+        "name": "Should I Be Proud Of This Plate?",
+        "slug": "should-i-be-proud-of-this-plate",
+        "category": "Health",
+        "category_slug": "health",
+        "summary": "Put a meal on trial under a chosen health lens and get green flags, watch-outs, and a tiny repair job.",
+        "eyebrow": "Featured",
+        "calculator_type": "plate-pride",
+        "microcopy": "Podge is judging the plate, not diagnosing you. Describe the meal, pick the health lens, and inspect the evidence.",
+        "formula": "Plate pride = protein + plants + fibre-friendly carbs - condition watch-outs - trigger risk - regular-pattern penalty",
+        "worked_example": "Chicken, rice, vegetables, and a salty sauce may score respectably for general balance, but under a blood-pressure lens the sodium becomes the main suspect.",
+        "disclaimer": "This is a broad dietary flag check, not medical advice. If you have diabetes on insulin, kidney disease, allergies, coeliac disease, pregnancy, an eating disorder history, or a clinician-prescribed diet, follow qualified advice over dinner theatre.",
+        "result_labels": ["Plate pride", "Condition fit", "Main suspect"],
+        "faq": [
+            {
+                "question": "Can this tell me if a meal is safe for my condition?",
+                "answer": "No. It flags likely dietary pros and watch-outs from broad principles. It cannot guarantee safety, account for medications, or replace clinician or dietitian advice.",
+            },
+            {
+                "question": "Why does the same meal change under different health lenses?",
+                "answer": "A plate can be fine in one context and awkward in another. Sodium, lactose, gluten, reflux triggers, purines, fibre, and refined carbs matter differently depending on the lens.",
+            },
+        ],
+        "defaults": {
+            "headline": "Answer a few questions first.",
+            "detail": "Your plate verdict will appear once Podge has enough evidence.",
+            "badge": "Waiting",
+            "mood": "Podge has put on a tiny courtroom wig.",
+            "signals": ["Waiting", "Not scored", "Ready"],
+            "explainer": "This engine starts blank because judging an imaginary dinner would be nutritional theatre with no witnesses.",
+            "summary": "Describe the plate-shaped incident and choose the health lens to get a verdict.",
+        },
+        "schema_faq": True,
+    },
 ]
+
+LIVE_TOOLS = [tool for tool in TOOL_REGISTRY if tool.get("calculator_type") != "placeholder"]
 
 GUIDES = [
     {
         "slug": "how-to-calculate-percentage-change",
         "title": "How to calculate percentage change without overthinking it",
         "summary": "A plain-English explainer with the formula, a worked example, and when the result can mislead.",
+        "sections": [
+            {
+                "heading": "The short version",
+                "body": "Percentage change compares where a value started with where it ended. The useful question is not just whether the number moved, but how large that movement is compared with the starting point.",
+            },
+            {
+                "heading": "The formula",
+                "body": "Subtract the old value from the new value, divide that difference by the old value, then multiply by 100. A positive answer is an increase. A negative answer is a decrease.",
+            },
+            {
+                "heading": "Where it can mislead",
+                "body": "Small starting values can make ordinary changes look dramatic. A rise from 1 to 2 is a 100% increase, but the actual change is still only 1. For money or business decisions, look at the percentage and the raw difference together.",
+            },
+        ],
+        "related_slugs": ["percentage-change-calculator", "vat-calculator", "sale-suspicion-gauge"],
     },
     {
         "slug": "when-a-quick-calculator-is-good-enough",
         "title": "When a quick instrument is good enough, and when it is not",
         "summary": "A short guide to estimates, disclaimers, and using Technofatty responsibly.",
+        "sections": [
+            {
+                "heading": "Good enough means useful, not perfect",
+                "body": "A quick calculator is useful when it helps you understand the shape of a decision: the likely range, the obvious trade-off, or the part that deserves attention. It is not a replacement for source data or professional judgement.",
+            },
+            {
+                "heading": "Use estimates for reversible decisions",
+                "body": "Room area, VAT, date gaps, rough subscription reviews, and simple purchase checks are usually good candidates for quick tools. They help you move without pretending the answer is more exact than it is.",
+            },
+            {
+                "heading": "Slow down for high-stakes contexts",
+                "body": "Health, legal, tax, safeguarding, finance, and safety questions need more care. Technofatty can flag obvious issues, but important decisions should be checked against qualified advice or official sources.",
+            },
+        ],
+        "related_slugs": ["room-area-calculator", "days-between-dates", "should-i-be-proud-of-this-plate"],
     },
     {
         "slug": "why-most-calculator-sites-are-hard-to-use",
         "title": "Why most answer sites are hard to use",
         "summary": "What Technofatty is trying to fix: clutter, filler, and hiding the useful bit.",
+        "sections": [
+            {
+                "heading": "The useful answer is often buried",
+                "body": "Many answer pages make people scroll through filler before they reach the actual tool or result. Technofatty is built around the opposite pattern: put the instrument first, then explain the result underneath.",
+            },
+            {
+                "heading": "Tools need personality, not confusion",
+                "body": "A memorable voice can help a page stick, but only if it does not make the answer harder to use. Podge exists to make the site distinctive while keeping the mechanics clear.",
+            },
+            {
+                "heading": "Verdicts work when they create a next move",
+                "body": "The strongest Technofatty pages do more than label a situation. They give a score, a verdict, a reason, and a next action that somebody might actually send to a friend.",
+            },
+        ],
+        "related_slugs": ["vaguepost-decoder", "future-embarrassment-gauge", "algorithm-tax-calculator"],
+    },
+    {
+        "slug": "how-to-tell-if-a-meal-fits-your-health-goals",
+        "title": "How to tell if a meal fits your health goals without turning dinner into a trial",
+        "summary": "A practical guide to judging meals by broad dietary signals, condition lenses, and one useful next move.",
+        "sections": [
+            {
+                "heading": "Judge the plate, not your worth",
+                "body": "One meal is not a personality verdict. A useful meal check looks for signals: protein, plants, fibre, salt, sugar, rich or fried elements, known triggers, and whether this was a one-off or a pattern.",
+            },
+            {
+                "heading": "The health lens changes the answer",
+                "body": "The same plate can look different under a blood-pressure, blood-sugar, reflux, lactose, coeliac, or kidney-conscious lens. Sodium, refined carbs, dairy, gluten, spicy foods, and unknown ingredients do not matter equally for everyone.",
+            },
+            {
+                "heading": "Use broad flags carefully",
+                "body": "A tool can flag likely watch-outs, but it cannot know lab results, medication, allergies, portion details, or a clinician-prescribed diet. For medical conditions, use broad verdicts as prompts, not permission slips.",
+            },
+        ],
+        "related_slugs": ["should-i-be-proud-of-this-plate", "water-intake-calculator", "sale-suspicion-gauge"],
+    },
+    {
+        "slug": "how-to-decide-whether-to-send-a-difficult-message",
+        "title": "How to decide whether to send a difficult message",
+        "summary": "A practical way to check tone, motive, timing, and screenshot risk before a message escapes the chat box.",
+        "sections": [
+            {
+                "heading": "The problem is rarely just the words",
+                "body": "A risky message usually has more than one issue: emotional heat, unclear motive, bad timing, and a recipient who may read it differently than intended. The words matter, but the surrounding situation matters too.",
+            },
+            {
+                "heading": "Check what the message is trying to do",
+                "body": "Clarifying, apologising, and setting a boundary are different from winning, punishing, or pretending to be fine. If the real motive is to make someone feel something, the message probably needs a slower pass.",
+            },
+            {
+                "heading": "Use the screenshot test",
+                "body": "If you would hate to see the message outside its original context, that is not automatic proof you should never send it. It is proof you should edit for clarity, proportion, and future-you.",
+            },
+        ],
+        "related_slugs": ["should-i-send-that-message-gauge", "future-embarrassment-gauge", "main-character-risk-calculator"],
+    },
+    {
+        "slug": "how-to-audit-subscriptions-without-cancelling-everything",
+        "title": "How to audit subscriptions without cancelling everything",
+        "summary": "A calm way to separate useful recurring costs from forgotten renewals, duplicates, and direct-debit fog.",
+        "sections": [
+            {
+                "heading": "Start with visibility",
+                "body": "Subscription bloat works because each charge feels small on its own. Add monthly costs, annual renewals, unused services, duplicate household subscriptions, and forgotten trials before deciding what deserves to stay.",
+            },
+            {
+                "heading": "Do not cancel useful things just to feel productive",
+                "body": "The point is not to punish every recurring payment. A service you use often and would choose again today is different from one that survives because the cancellation flow is annoying.",
+            },
+            {
+                "heading": "Review the stack on purpose",
+                "body": "A simple quarterly review is usually enough: keep what earns its place, cancel what only exists through inertia, and watch annual renewals before they become expensive surprises.",
+            },
+        ],
+        "related_slugs": ["subscription-shame-index", "algorithm-tax-calculator", "fancy-version-justification-engine"],
+    },
+    {
+        "slug": "how-to-spot-fake-hype-online",
+        "title": "How to spot fake hype online without becoming paranoid",
+        "summary": "A media-literacy guide to sudden consensus, repeated phrases, campaign signals, and suspiciously polished enthusiasm.",
+        "sections": [
+            {
+                "heading": "Real excitement is usually messier",
+                "body": "Organic hype tends to have mixed language, uneven timing, and people enjoying the thing in different ways. Manufactured-looking hype often arrives suddenly, repeats the same phrases, and sounds oddly briefed.",
+            },
+            {
+                "heading": "Look for coordination signals",
+                "body": "Identical wording, brand-new accounts, the same links, unexplained funding, and instant outrage are not proof by themselves. Together, they are reasons to slow down before amplifying.",
+            },
+            {
+                "heading": "Suspicion is not a conclusion",
+                "body": "A detector can help you withhold trust, but it should not become a machine for accusing strangers. Treat the pattern as evidence to inspect, not a verdict on intent.",
+            },
+        ],
+        "related_slugs": ["fake-fan-detector", "astroturf-detector", "vaguepost-decoder"],
     },
 ]
 
@@ -721,6 +952,11 @@ QUESTION_PROMPTS = [
         "href": "/calculators/ai-emotional-dependency-gauge/",
     },
     {
+        "question": "Should I be proud of this plate?",
+        "answer": "Useful when dinner needs a tiny courtroom under a health lens, not a morality spiral.",
+        "href": "/calculators/should-i-be-proud-of-this-plate/",
+    },
+    {
         "question": "How big is this room, really?",
         "answer": "Good for paint, flooring, furniture, and fewer trips back to the shop.",
         "href": "/calculators/room-area-calculator/",
@@ -804,6 +1040,11 @@ HOUSE_SPECIALS = [
         "slug": "ai-emotional-dependency-gauge",
         "pitch": "A wellbeing check for when an AI assistant is helping with feelings but may be replacing human support.",
     },
+    {
+        "name": "Should I Be Proud Of This Plate?",
+        "slug": "should-i-be-proud-of-this-plate",
+        "pitch": "A condition-aware meal verdict with green flags, charges pending, and one non-dramatic next move.",
+    },
 ]
 
 USER_ANSWER_FIRST_TYPES = {
@@ -820,11 +1061,22 @@ USER_ANSWER_FIRST_TYPES = {
     "astroturf-detector",
     "algorithm-tax",
     "ai-emotional-dependency",
+    "plate-pride",
 }
 
 
 def get_tool(slug):
-    return next((tool for tool in TOOL_REGISTRY if tool["slug"] == slug), None)
+    return next((tool for tool in LIVE_TOOLS if tool["slug"] == slug), None)
+
+
+def tools_by_category():
+    return [
+        {
+            "category": category,
+            "tools": [tool for tool in LIVE_TOOLS if tool["category_slug"] == category["slug"]],
+        }
+        for category in CATEGORIES
+    ]
 
 
 def base_context(**extra):
@@ -839,7 +1091,9 @@ def base_context(**extra):
         "question_prompts": QUESTION_PROMPTS,
         "instrument_types": INSTRUMENT_TYPES,
         "house_specials": HOUSE_SPECIALS,
-        "random_tool": random.choice(TOOL_REGISTRY),
+        "random_tool": random.choice(LIVE_TOOLS),
+        "contact_email": CONTACT_EMAIL,
+        "ads_enabled": False,
         **extra,
     }
 
@@ -865,12 +1119,14 @@ def calculators_index(request):
             meta_description="Browse Technofatty instruments for money, home, health, time, food, tech, and everyday questions.",
             page_title="Browse instruments",
             page_intro="Practical little engines, gauges, and instruments with clear labels and answers that show their working.",
+            tool_groups=tools_by_category(),
+            all_tools=LIVE_TOOLS,
         ),
     )
 
 
 def random_calculator(request):
-    tool = random.choice(TOOL_REGISTRY)
+    tool = random.choice(LIVE_TOOLS)
     return redirect("calculator_detail", slug=tool["slug"])
 
 
@@ -878,7 +1134,7 @@ def category_detail(request, slug):
     category = next((item for item in CATEGORIES if item["slug"] == slug), None)
     if not category:
         return custom_404(request, None)
-    tools = [tool for tool in TOOL_REGISTRY if tool["category_slug"] == slug]
+    tools = [tool for tool in LIVE_TOOLS if tool["category_slug"] == slug]
     return render(
         request,
         "core/category_detail.html",
@@ -887,6 +1143,7 @@ def category_detail(request, slug):
             meta_description=category["description"],
             category=category,
             category_tools=tools,
+            category_content=CATEGORY_CONTENT.get(slug),
         ),
     )
 
@@ -903,7 +1160,7 @@ def calculator_detail(request, slug):
         meta_title=f"{tool['name']} | Technofatty",
         meta_description=tool["summary"],
         tool=tool,
-        related_tools=[item for item in TOOL_REGISTRY if item["slug"] != slug][:3],
+        related_tools=[item for item in LIVE_TOOLS if item["slug"] != slug][:3],
     )
     return render(request, "core/calculator_detail.html", context)
 
@@ -912,6 +1169,10 @@ def guide_detail(request, slug):
     guide = next((item for item in GUIDES if item["slug"] == slug), None)
     if not guide:
         return custom_404(request, None)
+    related_tools = [
+        get_tool(related_slug)
+        for related_slug in guide.get("related_slugs", [])
+    ]
     return render(
         request,
         "core/guide_detail.html",
@@ -919,6 +1180,7 @@ def guide_detail(request, slug):
             meta_title=f"{guide['title']} | Technofatty",
             meta_description=guide["summary"],
             guide=guide,
+            related_tools=[tool for tool in related_tools if tool],
         ),
     )
 
@@ -951,7 +1213,7 @@ def contact(request):
         "core/contact.html",
         base_context(
             meta_title="Contact Technofatty",
-            meta_description="Suggest an instrument, share feedback, or ask Technofatty for a useful new idea.",
+            meta_description="Contact Technofatty with feedback, corrections, privacy questions, advertising queries, or suggestions for new instruments.",
         ),
     )
 
@@ -962,8 +1224,9 @@ def privacy(request):
         "core/legal.html",
         base_context(
             meta_title="Privacy Policy | Technofatty",
-            meta_description="Technofatty privacy policy placeholder for the initial Django build.",
+            meta_description="Technofatty privacy policy covering logs, cookies, analytics, advertising, and contact options.",
             legal_title="Privacy Policy",
+            updated_date="3 May 2026",
         ),
     )
 
@@ -974,8 +1237,9 @@ def terms(request):
         "core/legal.html",
         base_context(
             meta_title="Terms | Technofatty",
-            meta_description="Technofatty terms placeholder for the initial Django build.",
+            meta_description="Technofatty terms for using the site's calculators, verdict engines, guides, and content.",
             legal_title="Terms",
+            updated_date="3 May 2026",
         ),
     )
 
@@ -990,3 +1254,46 @@ def custom_404(request, exception):
         ),
         status=404,
     )
+
+
+def robots_txt(request):
+    lines = [
+        "User-agent: *",
+        "Allow: /",
+        "",
+        f"Sitemap: {SITE_DOMAIN}{reverse('sitemap_xml')}",
+    ]
+    return HttpResponse("\n".join(lines), content_type="text/plain")
+
+
+def ads_txt(request):
+    lines = [
+        "# Technofatty ads.txt",
+        "# Add the Google AdSense publisher line here after AdSense provides the real publisher ID.",
+    ]
+    return HttpResponse("\n".join(lines), content_type="text/plain")
+
+
+def sitemap_xml(request):
+    paths = [
+        reverse("home"),
+        reverse("calculators_index"),
+        reverse("ask_podge"),
+        reverse("about"),
+        reverse("contact"),
+        reverse("privacy"),
+        reverse("terms"),
+    ]
+    paths.extend(reverse("calculator_detail", args=[tool["slug"]]) for tool in LIVE_TOOLS)
+    paths.extend(reverse("category_detail", args=[category["slug"]]) for category in CATEGORIES)
+    paths.extend(reverse("guide_detail", args=[guide["slug"]]) for guide in GUIDES)
+    urls = "\n".join(
+        f"  <url><loc>{SITE_DOMAIN}{path}</loc></url>"
+        for path in paths
+    )
+    content = f"""<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+{urls}
+</urlset>
+"""
+    return HttpResponse(content, content_type="application/xml")

@@ -7,7 +7,34 @@
     <p>{{ category.description }}</p>
 </section>
 
+{% if category_content %}
+<section class="section split-section">
+    <article class="info-panel">
+        <p class="eyebrow">What this category does</p>
+        <h2>{{ category.name }} questions need more than vibes.</h2>
+        <p>{{ category_content.intro }}</p>
+        <p>{{ category_content.reading }}</p>
+    </article>
+    <article class="info-panel">
+        <p class="eyebrow">Useful when</p>
+        <h2>The common jobs</h2>
+        {% for item in category_content.use_cases %}
+        <p><strong>{{ forloop.counter }}.</strong> {{ item }}</p>
+        {% endfor %}
+    </article>
+</section>
+{% endif %}
+
+{% include "core/partials/ad_slot.html" with slot="category-top" %}
+
 <section class="section">
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow">Live instruments</p>
+            <h2>{{ category.name }} tools</h2>
+        </div>
+        <p>Pick the instrument closest to the question you actually have. The result pages include explanations, caveats, and related tools.</p>
+    </div>
     <div class="card-grid">
         {% for tool in category_tools %}
         <article class="card">

@@ -15,4 +15,7 @@ urlpatterns = [
     path("contact/", views.contact, name="contact"),
     path("privacy/", views.privacy, name="privacy"),
     path("terms/", views.terms, name="terms"),
+    path("robots.txt", views.robots_txt, name="robots_txt"),
+    path("ads.txt", views.ads_txt, name="ads_txt"),
+    path("sitemap.xml", views.sitemap_xml, name="sitemap_xml"),
 ]

@@ -41,8 +41,11 @@ document.addEventListener("DOMContentLoaded", () => {
         "astroturf-detector",
         "algorithm-tax",
         "ai-emotional-dependency",
+        "plate-pride",
     ]);
     const needsUserAnswersFirst = userAnswerFirstCalculators.has(calculatorType);
+    let hasSubmittedOnce = false;
+    let currentResult = null;
 
     if (needsUserAnswersFirst) {
         numberInputs.forEach((input) => {
@@ -83,6 +86,7 @@ document.addEventListener("DOMContentLoaded", () => {
         error.textContent = "";
     };
     const setResult = (result) => {
+        currentResult = result;
         headline.textContent = result.headline;
         detail.textContent = result.detail;
         badge.textContent = result.badge;
@@ -129,7 +133,60 @@ document.addEventListener("DOMContentLoaded", () => {
             return input.value.trim() !== "";
         });
     };
-    const buildCopyText = () => `${headline.textContent}. ${detail.textContent}`;
+    const stripTrailingPunctuation = (value) => value.trim().replace(/[.!?]+$/g, "");
+    const normalizeSentence = (value) => {
+        const trimmed = value.trim();
+        if (!trimmed) {
+            return "";
+        }
+        return /[.!?]$/.test(trimmed) ? trimmed : `${trimmed}.`;
+    };
+    const canonicalUrl = () => {
+        const canonical = document.querySelector('link[rel="canonical"]');
+        return canonical?.href || window.location.href;
+    };
+    const primaryMetricLine = (result) => {
+        if (result.shareMetric) {
+            return result.shareMetric;
+        }
+        const primaryLabel = delta?.nextElementSibling?.textContent?.trim();
+        const primaryValue = result.signals?.[0] || delta.textContent.trim();
+        if (primaryLabel && primaryValue) {
+            return `${primaryLabel}: ${primaryValue}`;
+        }
+        return "";
+    };
+    const buildShareText = (result) => {
+        const shareTitle = stripTrailingPunctuation(result.shareTitle || result.headline || headline.textContent);
+        const metric = primaryMetricLine(result);
+        const why = normalizeSentence(result.shareWhy || result.summary || result.detail || detail.textContent);
+        const next = normalizeSentence(result.shareNext || result.nextAction || result.summary || "");
+        const url = canonicalUrl();
+
+        if (needsUserAnswersFirst) {
+            return [
+                `Technofatty verdict: ${shareTitle}.`,
+                "",
+                metric,
+                why ? `Why: ${why}` : "",
+                next ? `Next: ${next}` : "",
+                "",
+                "Try it yourself:",
+                url,
+            ].filter((line) => line !== "").join("\n");
+        }
+
+        return [
+            `Technofatty result: ${shareTitle}.`,
+            "",
+            metric,
+            why,
+            "",
+            "Try it yourself:",
+            url,
+        ].filter((line) => line !== "").join("\n");
+    };
+    const buildCopyText = () => buildShareText(currentResult || neutralResult);
 
     const calculators = {
         "percentage-change": () => {
@@ -1184,6 +1241,228 @@ document.addEventListener("DOMContentLoaded", () => {
                 explainer: "This gauge weighs emotional frequency, repeated reassurance seeking, avoidance of real conversations, attachment language, disclosure habits, and the amount of offline support still present.",
                 summary: summaryText,
                 signals: [`${score}/100`, `${reassuranceLoop}/10`, `${support}/10`],
+                shareTitle: headlineText,
+                shareMetric: `Dependency risk: ${score}/100`,
+                shareWhy: `Reassurance loop is ${reassuranceLoop}/10 and offline human support is ${support}/10.`,
+                shareNext: score >= 75
+                    ? "Bring one trusted human or qualified professional back into the loop."
+                    : score <= 35
+                        ? "Keep using the tool as support, while keeping real people in the picture."
+                        : "Keep humans in the loop and watch for reassurance loops.",
+                verdictTone,
+            };
+        },
+        "plate-pride": () => {
+            const mealDescription = form.querySelector("#plate-description").value.trim();
+            const lens = form.querySelector("#plate-lens").value;
+            const mealSize = form.querySelector("#plate-size").value;
+            const protein = form.querySelector("#plate-protein").value;
+            const plants = form.querySelector("#plate-plants").value;
+            const carbs = form.querySelector("#plate-carbs").value;
+            const salt = form.querySelector("#plate-salt").value;
+            const sugar = form.querySelector("#plate-sugar").value;
+            const richness = form.querySelector("#plate-richness").value;
+            const trigger = form.querySelector("#plate-trigger").value.trim();
+            const pattern = form.querySelector("#plate-pattern").value;
+            const alcohol = form.querySelector("#plate-alcohol").checked;
+            const dairy = form.querySelector("#plate-dairy").checked;
+            const gluten = form.querySelector("#plate-gluten").checked;
+            const takeaway = form.querySelector("#plate-takeaway").checked;
+            const unknown = form.querySelector("#plate-unknown").checked;
+            const clinicianPlan = form.querySelector("#plate-clinician").checked;
+
+            if (!mealDescription) {
+                throw new Error("Describe the plate-shaped incident first.");
+            }
+
+            const lensLabelMap = {
+                general: "general balanced eating",
+                "blood-sugar": "blood sugar / diabetes-aware",
+                "blood-pressure": "high blood pressure / lower sodium",
+                cholesterol: "cholesterol / heart-health",
+                reflux: "reflux-sensitive",
+                ibs: "IBS-sensitive",
+                coeliac: "gluten-free / coeliac-aware",
+                lactose: "lactose intolerance",
+                gout: "gout-aware",
+                kidney: "kidney-conscious",
+            };
+            const proteinScoreMap = { none: -10, little: 2, decent: 10, carried: 14 };
+            const plantScoreMap = { none: -12, token: -4, some: 8, respectable: 14, victory: 18 };
+            const carbScoreMap = { low: 3, wholegrain: 10, refined: -6, sugary: -14, mixed: -2 };
+            const saltPenaltyMap = { fresh: 0, some: 6, processed: 14, goblin: 24 };
+            const sugarPenaltyMap = { none: 0, small: 4, drink: 14, dessert: 10, subplot: 18 };
+            const richnessPenaltyMap = { none: 0, rich: 6, fried: 12, creamy: 12, spicy: 8, chaos: 18 };
+            const sizePenaltyMap = { snack: 0, light: 0, normal: 2, big: 9, grazing: 12, refuse: 8 };
+            const patternPenaltyMap = { "one-off": 0, sometimes: 4, regular: 12, "dont-ask": 9 };
+
+            let conditionPenalty = 0;
+            let mainSuspect = "portion chaos";
+            const defence = [];
+            const charges = [];
+
+            if (protein !== "none") {
+                defence.push(protein === "carried" ? "Protein carried the plate in from the car park." : "Protein bothered attending.");
+            } else {
+                charges.push("Protein is missing, presumed uninterested.");
+            }
+            if (plants === "some" || plants === "respectable" || plants === "victory") {
+                defence.push(plants === "victory" ? "The plant kingdom filed a positive witness statement." : "Plants did some useful community service.");
+            } else {
+                charges.push("Plants made a weak appearance.");
+            }
+
+            const salty = salt === "processed" || salt === "goblin" || takeaway;
+            const sugary = sugar === "drink" || sugar === "dessert" || sugar === "subplot" || carbs === "sugary";
+            const richOrFried = richness === "rich" || richness === "fried" || richness === "creamy" || richness === "chaos";
+            const spicy = richness === "spicy" || richness === "chaos";
+            const dairyRisk = dairy || richness === "creamy";
+            const glutenRisk = gluten || unknown;
+            const triggerRisk = Boolean(trigger);
+
+            if (salty) {
+                charges.push("Salt or processing is doing suspicious overtime.");
+            }
+            if (sugary) {
+                charges.push("Sugar has a side-quest and possibly a clipboard.");
+            }
+            if (richOrFried) {
+                charges.push("Fried, creamy, or rich nonsense has entered wearing sunglasses indoors.");
+            }
+            if (triggerRisk) {
+                charges.push(`Known trigger flagged: ${trigger}.`);
+            }
+            if (unknown) {
+                charges.push("Ingredients are unclear, which is where optimism goes to get sued.");
+            }
+
+            if (lens === "blood-sugar") {
+                conditionPenalty += (sugary ? 22 : 0) + (carbs === "refined" ? 12 : 0) + (protein === "none" ? 8 : 0) + (plants === "none" || plants === "token" ? 8 : 0);
+                mainSuspect = sugary ? "sugar side-quest" : carbs === "refined" ? "refined carb admin" : "blood sugar wobble";
+                charges.push("Under a blood-sugar lens, refined carbs and sugary extras get less charming.");
+            } else if (lens === "blood-pressure") {
+                conditionPenalty += (salt === "some" ? 10 : 0) + (salt === "processed" ? 22 : 0) + (salt === "goblin" ? 34 : 0) + (takeaway ? 8 : 0);
+                mainSuspect = "sodium";
+                charges.push("Under a blood-pressure lens, sodium gets called to the witness box.");
+            } else if (lens === "cholesterol") {
+                conditionPenalty += (richOrFried ? 18 : 0) + (richness === "creamy" ? 10 : 0) + (plants === "none" || plants === "token" ? 8 : 0);
+                mainSuspect = richOrFried ? "creamy/fried villainy" : "heart-health admin";
+                charges.push("Under a heart-health lens, creamy and fried bits stop being cute.");
+            } else if (lens === "reflux") {
+                conditionPenalty += (spicy ? 16 : 0) + (richOrFried ? 14 : 0) + (mealSize === "big" || mealSize === "grazing" ? 10 : 0) + (alcohol ? 12 : 0);
+                mainSuspect = spicy ? "spicy foreshadowing" : "reflux trigger potential";
+                charges.push("Under a reflux lens, rich, spicy, alcoholic, or huge meals may write cheques your oesophagus has to cash.");
+            } else if (lens === "ibs") {
+                conditionPenalty += (triggerRisk ? 20 : 0) + (unknown ? 12 : 0) + (richOrFried ? 8 : 0);
+                mainSuspect = triggerRisk ? "known trigger" : "gut roulette";
+                charges.push("Under an IBS lens, known triggers get the final vote.");
+            } else if (lens === "coeliac") {
+                conditionPenalty += (glutenRisk ? 40 : 0) + (unknown ? 12 : 0);
+                mainSuspect = glutenRisk ? "gluten / cross-contact risk" : "label certainty";
+                charges.push("For coeliac disease, vibes are not enough. Ingredients and cross-contact matter.");
+            } else if (lens === "lactose") {
+                conditionPenalty += (dairyRisk ? 32 : 0) + (richness === "creamy" ? 8 : 0) + (trigger.toLowerCase().includes("milk") || trigger.toLowerCase().includes("cream") ? 8 : 0);
+                mainSuspect = dairyRisk ? "creamy dairy" : "lactose roulette";
+                charges.push("For lactose intolerance, dairy risk depends on portion, type, and your personal tolerance.");
+            } else if (lens === "gout") {
+                conditionPenalty += (alcohol ? 16 : 0) + (mealSize === "big" || mealSize === "grazing" ? 8 : 0) + (richOrFried ? 8 : 0);
+                mainSuspect = alcohol ? "alcohol" : "purine-adjacent caution";
+                charges.push("Under a gout-aware lens, alcohol and heavy rich meals deserve extra side-eye.");
+            } else if (lens === "kidney") {
+                conditionPenalty += (salty ? 20 : 0) + (unknown ? 12 : 0) + (clinicianPlan ? 25 : 0);
+                mainSuspect = clinicianPlan ? "clinician plan territory" : "kidney-specific unknowns";
+                charges.push("Kidney nutrition depends on labs, stage, medication, and professional advice. Podge cannot bless the plate.");
+            }
+
+            const baseScore = 68
+                + proteinScoreMap[protein]
+                + plantScoreMap[plants]
+                + carbScoreMap[carbs]
+                - saltPenaltyMap[salt]
+                - sugarPenaltyMap[sugar]
+                - richnessPenaltyMap[richness]
+                - sizePenaltyMap[mealSize]
+                - patternPenaltyMap[pattern]
+                - (alcohol ? 5 : 0)
+                - (takeaway ? 5 : 0)
+                - (unknown ? 8 : 0);
+            const platePride = Math.max(1, Math.min(100, Math.round(baseScore)));
+            const conditionFit = Math.max(1, Math.min(100, Math.round(platePride - conditionPenalty + (clinicianPlan ? -10 : 0))));
+
+            let headlineText = "Proud, but not smug.";
+            let badgeText = "Respectable plate";
+            let moodText = "Podge sees some edible civic responsibility.";
+            let summaryText = "There is enough useful food here to avoid a full nutritional hearing, but one or two suspects still need watching.";
+            let verdictTone = "amber";
+
+            if (conditionFit >= 78 && platePride >= 70) {
+                headlineText = "Proud enough. Do not become unbearable.";
+                badgeText = "Plate acquitted";
+                moodText = "Podge allows cautious pride.";
+                summaryText = "Protein, plants, and condition fit are doing useful work. This plate may leave the courtroom with dignity.";
+                verdictTone = "green";
+            } else if (conditionFit <= 38 || (lens === "kidney" && clinicianPlan)) {
+                headlineText = lens === "kidney" || clinicianPlan ? "This plate needs adult supervision." : "Dinner has filed a complaint.";
+                badgeText = lens === "kidney" || clinicianPlan ? "Human advice needed" : "Charges pending";
+                moodText = "Podge is removing the tiny courtroom wig and pointing at the disclaimer.";
+                summaryText = lens === "kidney" || clinicianPlan
+                    ? "This needs your clinician or dietitian plan more than dinner theatre. Treat this as a broad flag check only."
+                    : "The selected health lens is finding enough watch-outs that the next meal has been assigned community service.";
+                verdictTone = "red";
+            } else if (lens === "lactose" && dairyRisk) {
+                headlineText = "Lactose roulette.";
+                badgeText = "Dairy consequences";
+                moodText = "Podge has CC'd your stomach.";
+                summaryText = "The dairy may be fine for some people and dramatic for others. Your known tolerance is the judge with actual authority.";
+            } else if (lens === "coeliac" && glutenRisk) {
+                headlineText = "Cross-contamination has entered the chat.";
+                badgeText = "Do not guess";
+                moodText = "Podge refuses to bless gluten vibes.";
+                summaryText = "If this is coeliac, labels, ingredients, and prep surfaces matter more than optimism.";
+                verdictTone = "red";
+            } else if (lens === "reflux" && (spicy || richOrFried)) {
+                headlineText = "Delicious, but medically spicy.";
+                badgeText = "Reflux side-eye";
+                moodText = "Podge has heard from your oesophagus.";
+                summaryText = "Rich, fried, spicy, or large-meal energy may make this plate louder later than it seems now.";
+            } else if (lens === "blood-pressure" && salty) {
+                headlineText = "Respectable, with a sodium side-eye.";
+                badgeText = "Salt suspect";
+                moodText = "Podge is checking the sauce with narrowed eyes.";
+                summaryText = "There may be useful food here, but salty or processed elements are carrying more drama under a blood-pressure lens.";
+            } else if (lens === "blood-sugar" && sugary) {
+                headlineText = "Carb chaos, but possibly with witnesses.";
+                badgeText = "Sugar subplot";
+                moodText = "Podge is asking whether protein and fibre were present for questioning.";
+                summaryText = "Protein and plants can help the story, but sugary drinks, dessert, or refined carbs still make the blood-sugar lens less relaxed.";
+            }
+
+            const defenceText = defence.length ? defence.slice(0, 2).join(" ") : "Defence witnesses are thin on the ground.";
+            const chargesText = charges.length ? charges.slice(0, 3).join(" ") : "No major charges, just ordinary plate admin.";
+            const nextMove = conditionFit <= 38
+                ? "Use the next meal for a boring repair job: calmer, simpler, and closer to your real health plan."
+                : lens === "lactose" && dairyRisk
+                    ? "If dairy gets dramatic for you, use lactose-free swaps or keep the next plate dairy-calm."
+                    : lens === "blood-pressure" && salty
+                        ? "Make the next meal lower-salt and let fruit or vegetables do something useful."
+                        : lens === "blood-sugar" && sugary
+                            ? "Pair future carbs with protein or fibre, and do not let a sugary drink chair the meeting."
+                            : lens === "coeliac" && glutenRisk
+                                ? "Check labels and prep surfaces; for coeliac, guessing is not a strategy."
+                                : "Keep the useful bits, correct the obvious nonsense, and do not turn one plate into a morality play.";
+
+            return {
+                headline: headlineText,
+                detail: `Under the ${lensLabelMap[lens]} lens, plate pride is ${platePride}/100 and condition fit is ${conditionFit}/100. Main suspect: ${mainSuspect}.`,
+                badge: badgeText,
+                mood: moodText,
+                explainer: `Defence witnesses: ${defenceText} Charges pending: ${chargesText}`,
+                summary: summaryText,
+                signals: [`${platePride}/100`, `${conditionFit}/100`, mainSuspect],
+                shareTitle: headlineText,
+                shareMetric: `Plate pride: ${platePride}/100. Condition fit: ${conditionFit}/100.`,
+                shareWhy: `${defenceText} ${chargesText}`,
+                shareNext: nextMove,
                 verdictTone,
             };
         },
@@ -1206,12 +1485,19 @@ document.addEventListener("DOMContentLoaded", () => {
         event.preventDefault();
         try {
             updateResult();
+            if (needsUserAnswersFirst && hasRequiredInputs()) {
+                hasSubmittedOnce = true;
+            }
         } catch (errorObject) {
             setError(errorObject.message || "Something went wrong.");
         }
     });
 
     form.addEventListener("input", () => {
+        if (needsUserAnswersFirst && !hasSubmittedOnce) {
+            showNeutralResult();
+            return;
+        }
         try {
             updateResult();
         } catch (errorObject) {
@@ -1220,6 +1506,10 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     form.addEventListener("change", () => {
+        if (needsUserAnswersFirst && !hasSubmittedOnce) {
+            showNeutralResult();
+            return;
+        }
         try {
             updateResult();
         } catch (errorObject) {
@@ -1245,6 +1535,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         copyFeedback.textContent = "";
         if (needsUserAnswersFirst) {
+            hasSubmittedOnce = false;
             showNeutralResult();
             return;
         }
