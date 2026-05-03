@@ -27,6 +27,94 @@ Current deployed shape:
 
 Do not inspect or change the VPS deployment as if it is incomplete. Future work should preserve this Apache + mod_wsgi + Postgres baseline unless the user explicitly asks to revisit deployment architecture.
 
+## Latest Session State
+
+The current strategic focus is AdSense revenue. Technofatty is being shaped as an AdSense-first utility/verdict site, so new work should prioritise crawlable content depth, useful admin oversight, policy-safe pages, internal linking, and shareable tools that can earn search traffic.
+
+Recent important changes:
+
+- A Django superuser exists for username `paula`.
+- A staff-only backend tool suite has been started under `/admin-tools/`.
+- The Django admin homepage now includes a native-looking `Technofatty Tools` module, alongside the normal `Authentication and Authorization` module.
+- The top-right admin-tools shortcut was removed because the tools now live inside the admin body/sidebar pattern.
+- Custom admin tool pages use Django admin chrome/sidebar/context rather than the public Technofatty frontend shell.
+- `/admin-tools/` is now an admin tools index, not the AdSense readiness page itself.
+- `/admin-tools/adsense-readiness/` is the current live AdSense Readiness Dashboard.
+- The other admin tool pages have permanent queued URLs ready to be built.
+- Apache was restarted after the latest admin template changes.
+- Do not install or use Node on this VPS. The user explicitly does not want Node here.
+
+Latest verified checks after the admin-tools changes:
+
+```bash
+/var/www/technofatty/venv/bin/python manage.py check
+/var/www/technofatty/venv/bin/python manage.py test
+sudo apache2ctl configtest
+sudo systemctl restart apache2
+```
+
+The test suite was at 10 passing tests after the latest admin work.
+
+## Current Admin Tool Suite
+
+The backend tool suite is staff-only and should feel like Django admin, not the public frontend.
+
+Routes:
+
+```text
+/admin-tools/                         -> Admin Tools index
+/admin-tools/adsense-readiness/       -> AdSense Readiness Dashboard
+/admin-tools/content-inventory/       -> queued placeholder
+/admin-tools/seo-metadata/            -> queued placeholder
+/admin-tools/ymyl-safety/             -> queued placeholder
+/admin-tools/internal-links/          -> queued placeholder
+```
+
+Implementation files:
+
+```text
+core/views.py
+core/urls.py
+core/tests.py
+core/templates/admin/base_site.html
+core/templates/admin/index.html
+core/templates/core/admin_tools/base.html
+core/templates/core/admin_tools/index.html
+core/templates/core/admin_tools/readiness.html
+core/templates/core/admin_tools/queued.html
+```
+
+Important behaviour:
+
+- `admin.site.each_context(request)` is merged into admin tool contexts so the normal admin sidebar and top-right user links render correctly.
+- A synthetic `Technofatty Tools` app is prepended to `available_apps` for admin tool pages so the sidebar shows all five tools like native admin rows.
+- `core/templates/admin/index.html` overrides the admin homepage so `Technofatty Tools` appears as a native-looking module in the main admin dashboard.
+- `core/templates/admin/base_site.html` customises the admin branding/userlinks but should not add a separate top-right admin-tools shortcut.
+- The AdSense Readiness placeholder scan must read files with `encoding="utf-8", errors="replace"`; using the default encoding caused a live `UnicodeDecodeError` under Apache.
+
+Next recommended task:
+
+> Build `/admin-tools/content-inventory/` into the real Content Inventory admin page.
+
+That page should show every live and queued instrument, category, sitemap presence, guide/internal-link status, disclaimers, metadata/content strength signals, and direct public/admin links. Build it in the same Django-admin style, not with public frontend styling.
+
+## Forward Plan Snapshot
+
+Timestamp: `2026-05-03 12:15 UTC`
+
+This plan is intentionally time-sensitive and may become stale quickly. Treat it as the best known forward direction at the timestamp above, not as a permanent roadmap.
+
+1. Build `/admin-tools/content-inventory/` into the real Content Inventory page.
+2. Build `/admin-tools/seo-metadata/` into an SEO metadata audit.
+3. Build `/admin-tools/ymyl-safety/` into a health/YMYL safety audit.
+4. Build `/admin-tools/internal-links/` into an internal linking audit.
+5. Use those backend tools to identify thin pages, missing metadata, weak disclaimers, and poor link coverage.
+6. Improve weak public pages and verdict engines based on the audit findings.
+7. Verify Search Console setup and submit `https://technofatty.com/sitemap.xml` if not already done.
+8. Prepare the AdSense application once the content and policy checks look credible.
+9. Replace the `ads.txt` placeholder with the real Google publisher line after AdSense provides it.
+10. Later, when the site is closer to launch/scale, do the final production-hardening pass.
+
 ## Project Purpose
 
 Technofatty is a Django-based utility/verdict-engine website with the brand line:
@@ -75,6 +163,12 @@ core/templates/core/contact.html
 core/templates/core/guide_detail.html
 core/templates/core/legal.html
 core/templates/core/404.html
+core/templates/admin/base_site.html
+core/templates/admin/index.html
+core/templates/core/admin_tools/base.html
+core/templates/core/admin_tools/index.html
+core/templates/core/admin_tools/readiness.html
+core/templates/core/admin_tools/queued.html
 static/css/site.css
 static/js/calculator.js
 static/img/podge.svg
@@ -94,6 +188,7 @@ This is a simple Django 5.2 app.
 - Shared instrument template: `core/templates/core/calculator_detail.html`
 - Frontend scoring and live result logic: `static/js/calculator.js`
 - Site styling: `static/css/site.css`
+- Staff/admin tooling templates: `core/templates/admin/` and `core/templates/core/admin_tools/`
 - Tests: `core/tests.py`
 
 The application is registry-driven. `core/views.py` contains `TOOL_REGISTRY`, category data, guide data, question prompts, and house-special entries. `calculator_detail` looks up the current tool by slug and renders the shared detail template. The template switches on `tool.calculator_type` to render the correct form. `static/js/calculator.js` switches on the same calculator type and computes the live verdict/result.
@@ -176,6 +271,13 @@ Template-ready placeholders also exist in the registry:
 - `Recipe Scaling Instrument`
 - `Water Intake Gauge`
 
+Current queued backend/admin tools:
+
+- `Content Inventory`
+- `SEO Metadata Audit`
+- `Health/YMYL Safety`
+- `Internal Links`
+
 ## Exact Files Changed During Site Build
 
 Created/changed project files:
@@ -208,15 +310,26 @@ core/templates/core/contact.html
 core/templates/core/guide_detail.html
 core/templates/core/home.html
 core/templates/core/legal.html
+core/templates/admin/base_site.html
+core/templates/admin/index.html
+core/templates/core/admin_tools/base.html
+core/templates/core/admin_tools/index.html
+core/templates/core/admin_tools/readiness.html
+core/templates/core/admin_tools/queued.html
 static/css/site.css
 static/img/favicon.svg
 static/img/logo-mark.svg
 static/img/podge.svg
 static/js/calculator.js
 docs/codex-handoff.md
+docs/deployment-runbook.md
+docs/adsense-readiness-audit.md
+docs/backend-readiness-audit.md
 ```
 
-The most important implementation files are `core/views.py`, `core/templates/core/calculator_detail.html`, and `static/js/calculator.js`.
+The most important public instrument files are `core/views.py`, `core/templates/core/calculator_detail.html`, and `static/js/calculator.js`.
+
+The most important backend tool files are `core/views.py`, `core/urls.py`, `core/templates/admin/index.html`, `core/templates/admin/base_site.html`, and `core/templates/core/admin_tools/`.
 
 ## Current Local Settings State
 
@@ -458,6 +571,15 @@ From `/var/www/technofatty/app` on the VPS:
 /var/www/technofatty/venv/bin/python manage.py collectstatic
 ```
 
+For commands that need the live Postgres environment, source `.env` first because `manage.py` does not load it by itself:
+
+```bash
+set -a
+. /var/www/technofatty/app/.env
+set +a
+/var/www/technofatty/venv/bin/python manage.py check
+```
+
 Use the established VPS environment and `wsgi_prod.py` deployment shape when running deployment checks.
 
 ## Current Local Verification
@@ -472,9 +594,9 @@ Before this handoff, the local app had recently passed:
 The most recent direct route checks included:
 
 ```text
-/calculators/vaguepost-decoder/ -> 200
-/calculators/parent-phone-hypocrisy-meter/ -> 200
-/ask-podge/ -> 200
+/admin/ -> redirects anonymous users to login
+/admin-tools/ -> redirects anonymous users to login
+/admin-tools/adsense-readiness/ -> redirects anonymous users to login
 ```
 
 ## Cautions For The VPS Session

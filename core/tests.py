@@ -129,8 +129,19 @@ class SiteRoutesTests(TestCase):
         self.assertContains(readiness_response, "View site")
         self.assertNotContains(readiness_response, ">Admin tools<")
 
+        inventory_response = self.client.get(reverse("admin_tools_content_inventory"))
+        self.assertEqual(inventory_response.status_code, 200)
+        self.assertContains(inventory_response, "Content Inventory")
+        self.assertContains(inventory_response, "Instrument registry")
+        self.assertContains(inventory_response, "Should I Be Proud Of This Plate?")
+        self.assertContains(inventory_response, "Recipe Scaling Instrument")
+        self.assertContains(inventory_response, "Hidden while queued")
+        self.assertContains(inventory_response, "Title + description")
+        self.assertContains(inventory_response, "/calculators/should-i-be-proud-of-this-plate/")
+        self.assertContains(inventory_response, 'id="nav-sidebar"')
+        self.assertNotContains(inventory_response, "This page has a permanent admin URL and sidebar entry.")
+
         for route_name in [
-            "admin_tools_content_inventory",
             "admin_tools_seo_metadata",
             "admin_tools_ymyl_safety",
             "admin_tools_internal_links",

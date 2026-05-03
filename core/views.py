@@ -1112,7 +1112,7 @@ ADMIN_TOOL_NAV = [
         "name": "Content Inventory",
         "slug": "content-inventory",
         "url_name": "admin_tools_content_inventory",
-        "status": "Queued",
+        "status": "Live",
     },
     {
         "name": "SEO Metadata Audit",
@@ -1331,6 +1331,140 @@ def adsense_readiness_audit():
     }
 
 
+def content_inventory_audit():
+    sitemap_paths = set(public_route_paths())
+    guide_links_by_tool = {tool["slug"]: [] for tool in TOOL_REGISTRY}
+    for guide in GUIDES:
+        for slug in guide.get("related_slugs", []):
+            guide_links_by_tool.setdefault(slug, []).append(guide)
+
+    prompt_slugs = {
+        prompt["href"].strip("/").split("/")[-1]
+        for prompt in QUESTION_PROMPTS
+        if prompt.get("href", "").startswith("/calculators/")
+    }
+    house_special_slugs = {item["slug"] for item in HOUSE_SPECIALS}
+    category_lookup = {category["slug"]: category for category in CATEGORIES}
+    category_counts = {
+        category["slug"]: sum(1 for tool in LIVE_TOOLS if tool["category_slug"] == category["slug"])
+        for category in CATEGORIES
+    }
+
+    rows = []
+    for position, tool in enumerate(TOOL_REGISTRY, start=1):
+        is_live = tool.get("calculator_type") != "placeholder"
+        public_url = reverse("calculator_detail", args=[tool["slug"]]) if is_live else ""
+        sitemap_present = bool(public_url and public_url in sitemap_paths)
+        guide_count = len(guide_links_by_tool.get(tool["slug"], []))
+        has_internal_entry = tool["slug"] in prompt_slugs or tool["slug"] in house_special_slugs or guide_count > 0
+        has_metadata = bool(tool.get("name") and tool.get("summary"))
+        content_signals = [
+            bool(tool.get("microcopy")),
+            bool(tool.get("formula")),
+            bool(tool.get("worked_example")),
+            bool(tool.get("disclaimer")),
+            bool(tool.get("result_labels")),
+            bool(tool.get("faq")),
+            bool(tool.get("defaults")),
+            bool(tool.get("schema_faq")),
+        ]
+        content_score = sum(1 for signal in content_signals if signal)
+        rows.append(
+            {
+                "position": position,
+                "name": tool["name"],
+                "slug": tool["slug"],
+                "anchor": f"tool-{tool['slug']}",
+                "status": "Live" if is_live else "Queued",
+                "status_class": "pass" if is_live else "warn",
+                "category": tool.get("category", "Uncategorised"),
+                "category_ok": tool.get("category_slug") in category_lookup,
+                "calculator_type": tool.get("calculator_type", "unknown"),
+                "summary": tool.get("summary", ""),
+                "public_url": public_url,
+                "admin_url": f"{reverse('admin_tools_content_inventory')}#tool-{tool['slug']}",
+                "sitemap_present": sitemap_present,
+                "guide_count": guide_count,
+                "guide_titles": [guide["title"] for guide in guide_links_by_tool.get(tool["slug"], [])],
+                "internal_entry": has_internal_entry,
+                "in_question_prompts": tool["slug"] in prompt_slugs,
+                "in_house_specials": tool["slug"] in house_special_slugs,
+                "has_disclaimer": bool(tool.get("disclaimer")),
+                "has_metadata": has_metadata,
+                "content_score": content_score,
+                "content_total": len(content_signals),
+                "content_strength": "Strong" if content_score >= 7 else ("Partial" if content_score >= 4 else "Thin"),
+                "content_strength_class": "pass" if content_score >= 7 else ("warn" if content_score >= 4 else "fail"),
+            }
+        )
+
+    category_rows = []
+    for category in CATEGORIES:
+        category_url = reverse("category_detail", args=[category["slug"]])
+        has_content = category["slug"] in CATEGORY_CONTENT
+        category_rows.append(
+            {
+                "name": category["name"],
+                "slug": category["slug"],
+                "description": category["description"],
+                "live_tools": category_counts[category["slug"]],
+                "has_content": has_content,
+                "sitemap_present": category_url in sitemap_paths,
+                "public_url": category_url,
+                "admin_url": f"{reverse('admin_tools_content_inventory')}#category-{category['slug']}",
+            }
+        )
+
+    guide_rows = []
+    for guide in GUIDES:
+        guide_url = reverse("guide_detail", args=[guide["slug"]])
+        related_live_count = sum(1 for slug in guide.get("related_slugs", []) if get_tool(slug))
+        guide_rows.append(
+            {
+                "title": guide["title"],
+                "slug": guide["slug"],
+                "summary": guide["summary"],
+                "sections": len(guide.get("sections", [])),
+                "related_count": len(guide.get("related_slugs", [])),
+                "related_live_count": related_live_count,
+                "sitemap_present": guide_url in sitemap_paths,
+                "public_url": guide_url,
+                "admin_url": f"{reverse('admin_tools_content_inventory')}#guide-{guide['slug']}",
+            }
+        )
+
+    live_rows = [row for row in rows if row["status"] == "Live"]
+    queued_rows = [row for row in rows if row["status"] == "Queued"]
+    missing_disclaimers = [row for row in live_rows if not row["has_disclaimer"]]
+    weak_content = [row for row in live_rows if row["content_score"] < 7]
+    missing_internal_links = [row for row in live_rows if not row["internal_entry"]]
+    missing_sitemap = [row for row in live_rows if not row["sitemap_present"]]
+
+    return {
+        "summary": {
+            "total_tools": len(rows),
+            "live_tools": len(live_rows),
+            "queued_tools": len(queued_rows),
+            "categories": len(category_rows),
+            "guides": len(guide_rows),
+            "sitemap_urls": len(sitemap_paths),
+            "missing_disclaimers": len(missing_disclaimers),
+            "weak_content": len(weak_content),
+            "missing_internal_links": len(missing_internal_links),
+            "missing_sitemap": len(missing_sitemap),
+        },
+        "tools": rows,
+        "categories": category_rows,
+        "guides": guide_rows,
+        "next_actions": [
+            "Prioritise live tools with partial content strength before adding more queued instruments.",
+            "Give every live tool at least one guide, prompt, or house-special internal entry point.",
+            "Keep queued instruments out of the sitemap until they have real forms, copy, and disclaimers.",
+            "Use this inventory as the source list for the SEO Metadata and Internal Links admin tools.",
+        ],
+    }
+
+
 def base_context(**extra):
     return {
         "site_name": SITE_NAME,
@@ -1420,7 +1554,18 @@ def queued_admin_tool_context(request, active_slug):
 
 @staff_member_required
 def admin_tools_content_inventory(request):
-    return render(request, "core/admin_tools/queued.html", queued_admin_tool_context(request, "content-inventory"))
+    inventory = content_inventory_audit()
+    return render(
+        request,
+        "core/admin_tools/content_inventory.html",
+        admin_tools_context(
+            request,
+            "content-inventory",
+            page_title="Content Inventory",
+            page_intro="Registry-derived inventory of live and queued Technofatty instruments, categories, guide links, sitemap coverage, disclaimers, and content strength.",
+            inventory=inventory,
+        ),
+    )
 
 
 @staff_member_required

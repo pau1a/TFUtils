@@ -1,0 +1,183 @@
+{% extends "core/admin_tools/base.html" %}
+
+{% block admin_tool_content %}
+<div class="admin-tools-grid">
+    <div class="admin-tools-card">
+        <h2>Instrument registry</h2>
+        <h2>{{ inventory.summary.live_tools }} live / {{ inventory.summary.queued_tools }} queued</h2>
+        <p>{{ inventory.summary.total_tools }} total instruments tracked from <code>TOOL_REGISTRY</code>.</p>
+    </div>
+    <div class="admin-tools-card">
+        <h2>Content map</h2>
+        <h2>{{ inventory.summary.categories }} categories / {{ inventory.summary.guides }} guides</h2>
+        <p>{{ inventory.summary.sitemap_urls }} public URLs are currently generated for crawler discovery.</p>
+    </div>
+    <div class="admin-tools-card">
+        <h2>Attention needed</h2>
+        <h2>{{ inventory.summary.weak_content }} weak / {{ inventory.summary.missing_internal_links }} unlinked</h2>
+        <p>{{ inventory.summary.missing_disclaimers }} live tools missing disclaimers and {{ inventory.summary.missing_sitemap }} missing sitemap entries.</p>
+    </div>
+</div>
+
+<div class="module">
+    <h2>Instruments</h2>
+    <div class="admin-tools-card">
+        <p class="admin-tools-muted">Every live and queued instrument, with public reachability, internal-link coverage, metadata, disclaimer, and content strength signals.</p>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th scope="col">Instrument</th>
+                <th scope="col">Status</th>
+                <th scope="col">Category</th>
+                <th scope="col">Sitemap</th>
+                <th scope="col">Guide/internal links</th>
+                <th scope="col">Disclaimer</th>
+                <th scope="col">Metadata</th>
+                <th scope="col">Strength</th>
+                <th scope="col">Links</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for tool in inventory.tools %}
+            <tr id="{{ tool.anchor }}">
+                <th scope="row">
+                    {{ tool.name }}
+                    <div class="admin-tools-muted"><code>{{ tool.slug }}</code> · {{ tool.calculator_type }}</div>
+                    <div class="admin-tools-muted">{{ tool.summary }}</div>
+                </th>
+                <td class="admin-status-{{ tool.status_class }}">{{ tool.status }}</td>
+                <td>
+                    {{ tool.category }}
+                    {% if not tool.category_ok %}<div class="admin-status-fail">Unknown category</div>{% endif %}
+                </td>
+                <td>
+                    {% if tool.sitemap_present %}
+                    <span class="admin-status-pass">Present</span>
+                    {% elif tool.status == "Queued" %}
+                    <span class="admin-tools-muted">Hidden while queued</span>
+                    {% else %}
+                    <span class="admin-status-fail">Missing</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if tool.internal_entry %}
+                    <span class="admin-status-pass">Covered</span>
+                    {% else %}
+                    <span class="admin-status-warn">Needs entry</span>
+                    {% endif %}
+                    <div class="admin-tools-muted">
+                        {{ tool.guide_count }} guide{{ tool.guide_count|pluralize }};
+                        {% if tool.in_question_prompts %}prompt{% else %}no prompt{% endif %};
+                        {% if tool.in_house_specials %}house special{% else %}not featured{% endif %}
+                    </div>
+                </td>
+                <td>
+                    {% if tool.has_disclaimer %}
+                    <span class="admin-status-pass">Present</span>
+                    {% else %}
+                    <span class="admin-status-warn">Missing</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if tool.has_metadata %}
+                    <span class="admin-status-pass">Title + description</span>
+                    {% else %}
+                    <span class="admin-status-fail">Incomplete</span>
+                    {% endif %}
+                </td>
+                <td class="admin-status-{{ tool.content_strength_class }}">
+                    {{ tool.content_strength }}
+                    <div class="admin-tools-muted">{{ tool.content_score }}/{{ tool.content_total }} signals</div>
+                </td>
+                <td>
+                    {% if tool.public_url %}<a href="{{ tool.public_url }}">Public</a> / {% endif %}<a href="{{ tool.admin_url }}">Admin</a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="module">
+    <h2>Categories</h2>
+    <table>
+        <thead>
+            <tr>
+                <th scope="col">Category</th>
+                <th scope="col">Live tools</th>
+                <th scope="col">Content</th>
+                <th scope="col">Sitemap</th>
+                <th scope="col">Links</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for category in inventory.categories %}
+            <tr id="category-{{ category.slug }}">
+                <th scope="row">
+                    {{ category.name }}
+                    <div class="admin-tools-muted">{{ category.description }}</div>
+                </th>
+                <td>{{ category.live_tools }}</td>
+                <td>{% if category.has_content %}<span class="admin-status-pass">Present</span>{% else %}<span class="admin-status-warn">Missing</span>{% endif %}</td>
+                <td>{% if category.sitemap_present %}<span class="admin-status-pass">Present</span>{% else %}<span class="admin-status-fail">Missing</span>{% endif %}</td>
+                <td><a href="{{ category.public_url }}">Public</a> / <a href="{{ category.admin_url }}">Admin</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="module">
+    <h2>Guides</h2>
+    <table>
+        <thead>
+            <tr>
+                <th scope="col">Guide</th>
+                <th scope="col">Sections</th>
+                <th scope="col">Related tools</th>
+                <th scope="col">Sitemap</th>
+                <th scope="col">Links</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for guide in inventory.guides %}
+            <tr id="guide-{{ guide.slug }}">
+                <th scope="row">
+                    {{ guide.title }}
+                    <div class="admin-tools-muted"><code>{{ guide.slug }}</code></div>
+                    <div class="admin-tools-muted">{{ guide.summary }}</div>
+                </th>
+                <td>{{ guide.sections }}</td>
+                <td>
+                    {{ guide.related_live_count }}/{{ guide.related_count }} live
+                    {% if guide.related_live_count == guide.related_count %}
+                    <div class="admin-status-pass">Covered</div>
+                    {% else %}
+                    <div class="admin-status-warn">Includes queued/missing</div>
+                    {% endif %}
+                </td>
+                <td>{% if guide.sitemap_present %}<span class="admin-status-pass">Present</span>{% else %}<span class="admin-status-fail">Missing</span>{% endif %}</td>
+                <td><a href="{{ guide.public_url }}">Public</a> / <a href="{{ guide.admin_url }}">Admin</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="admin-tools-grid">
+    <div class="admin-tools-card">
+        <h2>Next actions</h2>
+        <ol class="admin-tools-actions">
+        {% for action in inventory.next_actions %}
+            <li>{{ action }}</li>
+        {% endfor %}
+        </ol>
+    </div>
+    <div class="admin-tools-card">
+        <h2>Source of truth</h2>
+        <p>This inventory is generated from the current Django registries and URL reversals. It does not require database content models.</p>
+        <p>Queued instruments stay visible here but remain hidden from public index, random routes, and sitemap output.</p>
+    </div>
+</div>
+{% endblock %}
