@@ -1,5 +1,6 @@
 from django.test import TestCase
 from django.urls import reverse
+from django.contrib.auth import get_user_model
 
 
 class SiteRoutesTests(TestCase):
@@ -82,3 +83,58 @@ class SiteRoutesTests(TestCase):
         self.assertContains(sitemap, "https://technofatty.com/calculators/should-i-be-proud-of-this-plate/")
         self.assertContains(sitemap, "https://technofatty.com/guides/how-to-spot-fake-hype-online/")
         self.assertContains(sitemap, "https://technofatty.com/privacy/")
+
+    def test_admin_tools_dashboard_is_staff_only(self):
+        url = reverse("admin_tools_index")
+        readiness_url = reverse("admin_tools_adsense_readiness")
+
+        anonymous = self.client.get(url)
+        self.assertEqual(anonymous.status_code, 302)
+        self.assertIn("/admin/login/", anonymous["Location"])
+
+        user_model = get_user_model()
+        normal_user = user_model.objects.create_user(username="normal", password="testpass123")
+        self.client.force_login(normal_user)
+        normal_response = self.client.get(url)
+        self.assertEqual(normal_response.status_code, 302)
+        self.assertIn("/admin/login/", normal_response["Location"])
+
+        staff_user = user_model.objects.create_user(
+            username="staff",
+            password="testpass123",
+            is_staff=True,
+            is_superuser=True,
+        )
+        self.client.force_login(staff_user)
+        staff_response = self.client.get(url)
+        self.assertEqual(staff_response.status_code, 200)
+        self.assertContains(staff_response, "Technofatty Tools")
+        self.assertContains(staff_response, "AdSense Readiness")
+        self.assertContains(staff_response, "Content Inventory")
+        self.assertContains(staff_response, readiness_url)
+
+        admin_response = self.client.get(reverse("admin:index"))
+        self.assertEqual(admin_response.status_code, 200)
+        self.assertContains(admin_response, "Technofatty Tools")
+        self.assertContains(admin_response, readiness_url)
+        self.assertContains(admin_response, reverse("admin_tools_content_inventory"))
+        self.assertNotContains(admin_response, ">Admin tools<")
+
+        readiness_response = self.client.get(readiness_url)
+        self.assertEqual(readiness_response.status_code, 200)
+        self.assertContains(readiness_response, "AdSense Readiness Dashboard")
+        self.assertContains(readiness_response, 'id="nav-sidebar"')
+        self.assertContains(readiness_response, "Technofatty Tools")
+        self.assertContains(readiness_response, "Authentication and Authorization")
+        self.assertContains(readiness_response, "View site")
+        self.assertNotContains(readiness_response, ">Admin tools<")
+
+        for route_name in [
+            "admin_tools_content_inventory",
+            "admin_tools_seo_metadata",
+            "admin_tools_ymyl_safety",
+            "admin_tools_internal_links",
+        ]:
+            queued_response = self.client.get(reverse(route_name))
+            self.assertEqual(queued_response.status_code, 200)
+            self.assertContains(queued_response, "Technofatty Tools")

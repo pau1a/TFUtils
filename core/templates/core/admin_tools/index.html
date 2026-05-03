@@ -1,0 +1,25 @@
+{% extends "core/admin_tools/base.html" %}
+
+{% block admin_tool_content %}
+<div class="module">
+    <h2>Technofatty Tools</h2>
+    <table>
+        <thead>
+            <tr>
+                <th scope="col">Tool</th>
+                <th scope="col">Status</th>
+                <th scope="col">Open</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for item in admin_tool_nav %}
+            <tr>
+                <th scope="row">{{ item.name }}</th>
+                <td>{{ item.status }}</td>
+                <td><a href="{% url item.url_name %}">Open</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

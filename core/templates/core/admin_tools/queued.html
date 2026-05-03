@@ -1,0 +1,11 @@
+{% extends "core/admin_tools/base.html" %}
+
+{% block admin_tool_content %}
+<div class="module">
+    <h2>{{ tool.name }}</h2>
+    <div class="admin-tools-card">
+        <p><strong>Status:</strong> {{ tool.status }}</p>
+        <p>This page has a permanent admin URL and sidebar entry. The working dashboard will be built here next.</p>
+    </div>
+</div>
+{% endblock %}

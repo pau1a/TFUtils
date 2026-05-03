@@ -20,21 +20,38 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-7k9ydkrx-j@(^5y04phb88bg_3%1x+5#+1tk758n7kt@@sq7t*'
+def env_bool(name, default=False):
+    value = os.environ.get(name)
+    if value is None:
+        return default
+    return value.strip().lower() in {"1", "true", "yes", "on"}
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 
-# ALLOWED_HOSTS = ["localhost", "127.0.0.1", "testserver"]
+def env_list(name, default):
+    value = os.environ.get(name)
+    if not value:
+        return default
+    return [item.strip() for item in value.split(",") if item.strip()]
 
-ALLOWED_HOSTS = [
-    "localhost",
-    "127.0.0.1",
-    "testserver",
-    "technofatty.com",
-    "www.technofatty.com",
-]
+
+# SECURITY WARNING: keep the secret key used in production secret.
+SECRET_KEY = os.environ.get(
+    "DJANGO_SECRET_KEY",
+    "django-insecure-7k9ydkrx-j@(^5y04phb88bg_3%1x+5#+1tk758n7kt@@sq7t*",
+)
+
+# This deployment is still intentionally internet-facing dev. Set
+# DJANGO_DEBUG=0 and DJANGO_SECRET_KEY before treating it as production.
+DEBUG = env_bool("DJANGO_DEBUG", default=True)
+
+ALLOWED_HOSTS = env_list(
+    "DJANGO_ALLOWED_HOSTS",
+    ["localhost", "127.0.0.1", "testserver", "technofatty.com", "www.technofatty.com"],
+)
+CSRF_TRUSTED_ORIGINS = env_list(
+    "DJANGO_CSRF_TRUSTED_ORIGINS",
+    ["https://technofatty.com", "https://www.technofatty.com"],
+)
 
 
 # Application definition
@@ -147,6 +164,14 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SESSION_COOKIE_SECURE = env_bool("DJANGO_SESSION_COOKIE_SECURE", default=not DEBUG)
+CSRF_COOKIE_SECURE = env_bool("DJANGO_CSRF_COOKIE_SECURE", default=not DEBUG)
+SECURE_SSL_REDIRECT = env_bool("DJANGO_SECURE_SSL_REDIRECT", default=False)
+SECURE_HSTS_SECONDS = int(os.environ.get("DJANGO_SECURE_HSTS_SECONDS", "0" if DEBUG else "31536000"))
+SECURE_HSTS_INCLUDE_SUBDOMAINS = env_bool("DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS", default=not DEBUG)
+SECURE_HSTS_PRELOAD = env_bool("DJANGO_SECURE_HSTS_PRELOAD", default=False)
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

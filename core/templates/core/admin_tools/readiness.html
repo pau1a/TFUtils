@@ -1,0 +1,64 @@
+{% extends "core/admin_tools/base.html" %}
+
+{% block admin_tool_content %}
+<div class="admin-tools-grid">
+    <div class="admin-tools-card">
+        <h2>Overall status</h2>
+        <h2>{{ audit.summary.status }}</h2>
+        <p>{{ audit.summary.passed }} passed, {{ audit.summary.warnings }} warnings, {{ audit.summary.failed }} failures.</p>
+    </div>
+    <div class="admin-tools-card">
+        <h2>Content base</h2>
+        <h2>{{ audit.summary.live_tools }} tools</h2>
+        <p>{{ audit.summary.guides }} guides and {{ audit.summary.sitemap_urls }} sitemap URLs are currently visible to crawlers.</p>
+    </div>
+    <div class="admin-tools-card">
+        <h2>Next gate</h2>
+        <h2>External setup</h2>
+        <p>Search Console, sitemap submission, final live QA, then AdSense application.</p>
+    </div>
+</div>
+
+<div class="module">
+    <h2>AdSense readiness checks</h2>
+    <div class="admin-tools-card">
+        <p class="admin-tools-muted">Generated from the current registry, public routes, crawl files, and known policy-page setup.</p>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th scope="col">Status</th>
+                <th scope="col">Check</th>
+                <th scope="col">Detail</th>
+                <th scope="col">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for item in audit.items %}
+            <tr>
+                <td class="admin-status-{{ item.status|lower }}">{{ item.status }}</td>
+                <th scope="row">{{ item.label }}</th>
+                <td>{{ item.detail }}</td>
+                <td>{% if item.action %}<code>{{ item.action }}</code>{% else %}<span class="admin-tools-muted">None</span>{% endif %}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="admin-tools-grid">
+    <div class="admin-tools-card">
+        <h2>Next actions</h2>
+        <ol class="admin-tools-actions">
+        {% for action in audit.next_actions %}
+            <li>{{ action }}</li>
+        {% endfor %}
+        </ol>
+    </div>
+    <div class="admin-tools-card">
+        <h2>Future admin tools</h2>
+        <p>This dashboard shares navigation and audit helpers with the planned Content Inventory, SEO Metadata Audit, Health/YMYL Safety Audit, and Internal Link Audit.</p>
+        <p>The goal is one private command centre for managing Technofatty as an AdSense-first site.</p>
+    </div>
+</div>
+{% endblock %}

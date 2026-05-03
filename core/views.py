@@ -1,5 +1,8 @@
 import random
 
+from django.contrib import admin
+from django.contrib.admin.views.decorators import staff_member_required
+from django.conf import settings
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
@@ -1079,6 +1082,255 @@ def tools_by_category():
     ]
 
 
+def public_route_paths():
+    paths = [
+        reverse("home"),
+        reverse("calculators_index"),
+        reverse("ask_podge"),
+        reverse("about"),
+        reverse("contact"),
+        reverse("privacy"),
+        reverse("terms"),
+        reverse("robots_txt"),
+        reverse("ads_txt"),
+        reverse("sitemap_xml"),
+    ]
+    paths.extend(reverse("calculator_detail", args=[tool["slug"]]) for tool in LIVE_TOOLS)
+    paths.extend(reverse("category_detail", args=[category["slug"]]) for category in CATEGORIES)
+    paths.extend(reverse("guide_detail", args=[guide["slug"]]) for guide in GUIDES)
+    return paths
+
+
+ADMIN_TOOL_NAV = [
+    {
+        "name": "AdSense Readiness",
+        "slug": "adsense-readiness",
+        "url_name": "admin_tools_adsense_readiness",
+        "status": "Live",
+    },
+    {
+        "name": "Content Inventory",
+        "slug": "content-inventory",
+        "url_name": "admin_tools_content_inventory",
+        "status": "Queued",
+    },
+    {
+        "name": "SEO Metadata Audit",
+        "slug": "seo-metadata",
+        "url_name": "admin_tools_seo_metadata",
+        "status": "Queued",
+    },
+    {
+        "name": "Health/YMYL Safety",
+        "slug": "ymyl-safety",
+        "url_name": "admin_tools_ymyl_safety",
+        "status": "Queued",
+    },
+    {
+        "name": "Internal Links",
+        "slug": "internal-links",
+        "url_name": "admin_tools_internal_links",
+        "status": "Queued",
+    },
+]
+
+
+def admin_tools_context(request, active_slug, **extra):
+    page_title = extra.get("page_title", "Admin Tools")
+    context = admin.site.each_context(request)
+    tool_app = {
+        "name": "Technofatty Tools",
+        "app_label": "technofatty_tools",
+        "app_url": reverse("admin_tools_index"),
+        "has_module_perms": True,
+        "models": [
+            {
+                "name": item["name"],
+                "object_name": item["slug"].replace("-", "_"),
+                "admin_url": reverse(item["url_name"]),
+                "add_url": None,
+                "view_only": True,
+            }
+            for item in ADMIN_TOOL_NAV
+        ],
+    }
+    context["available_apps"] = [tool_app, *context.get("available_apps", [])]
+    context.update(base_context(
+        title=page_title,
+        meta_title="Admin Tools | Technofatty",
+        meta_description="Staff-only operational dashboards for Technofatty.",
+        admin_tool_nav=ADMIN_TOOL_NAV,
+        active_admin_tool=active_slug,
+        **extra,
+    ))
+    return context
+
+
+def readiness_item(label, passed, detail, severity="critical", action=""):
+    return {
+        "label": label,
+        "passed": passed,
+        "status": "Pass" if passed else ("Warn" if severity == "warning" else "Fail"),
+        "severity": severity,
+        "detail": detail,
+        "action": action,
+    }
+
+
+def placeholder_scan():
+    blockers = [
+        "starter placeholder",
+        "initial Django build",
+        "wire this page",
+        "before launch",
+        "Template-ready",
+    ]
+    files = [
+        settings.BASE_DIR / "core" / "templates" / "core" / "legal.html",
+        settings.BASE_DIR / "core" / "templates" / "core" / "contact.html",
+        settings.BASE_DIR / "core" / "templates" / "core" / "calculators_index.html",
+        settings.BASE_DIR / "core" / "templates" / "core" / "category_detail.html",
+        settings.BASE_DIR / "core" / "views.py",
+    ]
+    hits = []
+    for path in files:
+        text = path.read_text(encoding="utf-8", errors="replace")
+        for blocker in blockers:
+            if blocker.lower() in text.lower():
+                hits.append(f"{path.relative_to(settings.BASE_DIR)}: {blocker}")
+    return hits
+
+
+def ads_txt_lines():
+    return ads_txt(None).content.decode("utf-8").splitlines()
+
+
+def adsense_readiness_audit():
+    live_tool_count = len(LIVE_TOOLS)
+    queued_tool_count = len(TOOL_REGISTRY) - live_tool_count
+    guide_count = len(GUIDES)
+    category_content_count = len(CATEGORY_CONTENT)
+    sitemap_paths = public_route_paths()
+    placeholder_hits = placeholder_scan()
+    ads_lines = ads_txt_lines()
+    has_real_adsense_line = any("google.com, pub-" in line and "XXXXXXXXXXXXXXXX" not in line for line in ads_lines)
+    health_tools = [tool for tool in LIVE_TOOLS if tool["category_slug"] == "health"]
+    health_disclaimer_count = sum(
+        1
+        for tool in health_tools
+        if "medical advice" in tool.get("disclaimer", "").lower()
+        or "qualified advice" in tool.get("disclaimer", "").lower()
+    )
+
+    items = [
+        readiness_item(
+            "Privacy policy",
+            True,
+            "Privacy route is live with public-facing copy.",
+            action="/privacy/",
+        ),
+        readiness_item(
+            "Terms page",
+            True,
+            "Terms route is live with informational-use and no-professional-advice language.",
+            action="/terms/",
+        ),
+        readiness_item(
+            "Contact route",
+            bool(CONTACT_EMAIL),
+            f"Contact email configured as {CONTACT_EMAIL}.",
+            action="/contact/",
+        ),
+        readiness_item(
+            "robots.txt",
+            True,
+            "robots.txt is routed and points to the sitemap.",
+            action="/robots.txt",
+        ),
+        readiness_item(
+            "sitemap.xml",
+            live_tool_count > 0 and guide_count > 0,
+            f"Sitemap includes {len(sitemap_paths)} public URLs across tools, categories, guides, and policy pages.",
+            action="/sitemap.xml",
+        ),
+        readiness_item(
+            "ads.txt route",
+            True,
+            "ads.txt is routed. Real publisher ID is pending until AdSense provides it.",
+            severity="warning",
+            action="/ads.txt",
+        ),
+        readiness_item(
+            "Real AdSense publisher line",
+            has_real_adsense_line,
+            "No real Google publisher line yet. This is expected before AdSense approval.",
+            severity="warning",
+            action="Add google.com, pub-... after approval.",
+        ),
+        readiness_item(
+            "Public placeholder scan",
+            not placeholder_hits,
+            "No launch-blocking placeholder strings found." if not placeholder_hits else "; ".join(placeholder_hits),
+            action="Remove construction copy from public pages.",
+        ),
+        readiness_item(
+            "Live tool library",
+            live_tool_count >= 15,
+            f"{live_tool_count} live tools and {queued_tool_count} queued tools. Queued tools are hidden from public library/random routes.",
+            action="/calculators/",
+        ),
+        readiness_item(
+            "Guide depth",
+            guide_count >= 7,
+            f"{guide_count} guide pages are registered and included in sitemap.",
+            action="/guides/how-to-spot-fake-hype-online/",
+        ),
+        readiness_item(
+            "Category depth",
+            category_content_count == len(CATEGORIES),
+            f"{category_content_count} of {len(CATEGORIES)} categories have explanatory content.",
+            action="/categories/health/",
+        ),
+        readiness_item(
+            "Health/YMYL disclaimers",
+            health_disclaimer_count == len(health_tools),
+            f"{health_disclaimer_count} of {len(health_tools)} live health tools include explicit medical/qualified-advice caution.",
+            action="/categories/health/",
+        ),
+        readiness_item(
+            "Disabled ad-slot scaffolding",
+            True,
+            "Reusable ad slot partial exists and is disabled while ads_enabled is false.",
+            severity="warning",
+            action="Enable only after AdSense approval.",
+        ),
+    ]
+
+    failed_count = sum(1 for item in items if item["status"] == "Fail")
+    warning_count = sum(1 for item in items if item["status"] == "Warn")
+    passed_count = sum(1 for item in items if item["status"] == "Pass")
+
+    return {
+        "summary": {
+            "status": "Ready for external setup" if failed_count == 0 else "Needs fixes",
+            "passed": passed_count,
+            "warnings": warning_count,
+            "failed": failed_count,
+            "live_tools": live_tool_count,
+            "guides": guide_count,
+            "sitemap_urls": len(sitemap_paths),
+        },
+        "items": items,
+        "next_actions": [
+            "Verify technofatty.com in Google Search Console.",
+            "Submit https://technofatty.com/sitemap.xml.",
+            "Apply for AdSense after final live QA.",
+            "Replace ads.txt comment with the real Google publisher line after AdSense provides it.",
+            "Build the next admin tool: Content Inventory.",
+        ],
+    }
+
+
 def base_context(**extra):
     return {
         "site_name": SITE_NAME,
@@ -1123,6 +1375,67 @@ def calculators_index(request):
             all_tools=LIVE_TOOLS,
         ),
     )
+
+
+@staff_member_required
+def admin_tools_index(request):
+    return render(
+        request,
+        "core/admin_tools/index.html",
+        admin_tools_context(
+            request,
+            "index",
+            page_title="Admin Tools",
+            page_intro="Staff-only Technofatty operating tools for content, AdSense readiness, search quality, and internal housekeeping.",
+        ),
+    )
+
+
+@staff_member_required
+def admin_tools_adsense_readiness(request):
+    audit = adsense_readiness_audit()
+    return render(
+        request,
+        "core/admin_tools/readiness.html",
+        admin_tools_context(
+            request,
+            "adsense-readiness",
+            page_title="AdSense Readiness Dashboard",
+            page_intro="Staff-only checks for the pieces that need to be in place before Technofatty applies for or scales Google ads.",
+            audit=audit,
+        ),
+    )
+
+
+def queued_admin_tool_context(request, active_slug):
+    tool = next(item for item in ADMIN_TOOL_NAV if item["slug"] == active_slug)
+    return admin_tools_context(
+        request,
+        active_slug,
+        page_title=tool["name"],
+        page_intro="This staff tool is queued in the admin suite and will be built as part of the AdSense operating backend.",
+        tool=tool,
+    )
+
+
+@staff_member_required
+def admin_tools_content_inventory(request):
+    return render(request, "core/admin_tools/queued.html", queued_admin_tool_context(request, "content-inventory"))
+
+
+@staff_member_required
+def admin_tools_seo_metadata(request):
+    return render(request, "core/admin_tools/queued.html", queued_admin_tool_context(request, "seo-metadata"))
+
+
+@staff_member_required
+def admin_tools_ymyl_safety(request):
+    return render(request, "core/admin_tools/queued.html", queued_admin_tool_context(request, "ymyl-safety"))
+
+
+@staff_member_required
+def admin_tools_internal_links(request):
+    return render(request, "core/admin_tools/queued.html", queued_admin_tool_context(request, "internal-links"))
 
 
 def random_calculator(request):

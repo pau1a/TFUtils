@@ -123,6 +123,23 @@ Track:
 - result-copy usage
 - tool completion rate
 
+## Staff Admin Tools
+
+A staff-only admin tools area now starts at:
+
+```text
+/admin-tools/
+```
+
+The first page is the AdSense Readiness Dashboard. It checks policy routes, crawl files, live tool counts, guide counts, category content, health disclaimers, placeholder scans, and the pending real AdSense publisher line.
+
+The admin tools area is designed as a five-page suite. The next planned dashboards should reuse the same shell and navigation:
+
+- Content Inventory
+- SEO Metadata Audit
+- Health/YMYL Safety Audit
+- Internal Link Audit
+
 ## Health/YMYL Caution
 
 The health tools are useful but should remain conservative. For pages such as `Should I Be Proud Of This Plate?`:

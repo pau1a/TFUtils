@@ -1,0 +1,134 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    .admin-tools-intro {
+        margin: 0 0 1.25rem;
+        max-width: 72rem;
+    }
+
+    .admin-tools-intro p {
+        color: var(--body-quiet-color);
+        font-size: 0.875rem;
+        margin: 0.35rem 0 0;
+    }
+
+    .admin-tools-nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin: 0 0 1.5rem;
+    }
+
+    .admin-tools-nav a,
+    .admin-tools-nav span {
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        color: var(--body-fg);
+        display: inline-block;
+        padding: 0.5rem 0.7rem;
+        text-decoration: none;
+    }
+
+    .admin-tools-nav a.active {
+        background: var(--selected-bg);
+        border-color: var(--primary);
+        color: var(--link-fg);
+        font-weight: 600;
+    }
+
+    .admin-tools-nav span {
+        color: var(--body-quiet-color);
+        background: var(--darkened-bg);
+    }
+
+    .admin-tools-grid {
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        margin-bottom: 1.5rem;
+    }
+
+    .admin-tools-card {
+        background: var(--body-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        padding: 1rem;
+    }
+
+    .admin-tools-card h2,
+    .admin-tools-card h3 {
+        font-size: 1rem;
+        margin: 0 0 0.5rem;
+    }
+
+    .admin-tools-card p {
+        margin: 0.25rem 0;
+    }
+
+    .admin-status-pass {
+        color: #237804;
+        font-weight: 600;
+    }
+
+    .admin-status-warn {
+        color: #ad6800;
+        font-weight: 600;
+    }
+
+    .admin-status-fail {
+        color: #a8071a;
+        font-weight: 600;
+    }
+
+    .admin-tools-muted {
+        color: var(--body-quiet-color);
+        font-size: 0.8125rem;
+    }
+
+    .admin-tools-actions {
+        margin: 0;
+        padding-left: 1.25rem;
+    }
+
+    .admin-tools-actions li {
+        margin-bottom: 0.45rem;
+    }
+
+    @media (max-width: 767px) {
+        .admin-tools-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
+    &rsaquo; {{ page_title }}
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="admin-tools-intro">
+    <h1>{{ page_title }}</h1>
+    <p>{{ page_intro }}</p>
+</div>
+
+<nav class="admin-tools-nav" aria-label="Admin tool navigation">
+{% for item in admin_tool_nav %}
+    {% if item.url_name %}
+    <a class="{% if active_admin_tool == item.slug %}active{% endif %}" href="{% url item.url_name %}">
+        {{ item.name }}{% if item.status %} <span class="admin-tools-muted">({{ item.status }})</span>{% endif %}
+    </a>
+    {% else %}
+    <span>{{ item.name }}{% if item.status %} <span class="admin-tools-muted">({{ item.status }})</span>{% endif %}</span>
+    {% endif %}
+{% endfor %}
+</nav>
+
+{% block admin_tool_content %}{% endblock %}
+{% endblock %}

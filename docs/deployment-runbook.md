@@ -63,6 +63,36 @@ Certbot certificate:
 /etc/letsencrypt/live/technofatty.com/
 ```
 
+## Django Environment
+
+The live WSGI entrypoint loads `/var/www/technofatty/app/.env` before importing Django.
+
+Important environment variables:
+
+```text
+DJANGO_DEBUG=1
+DJANGO_SECRET_KEY=<long random secret before production>
+DJANGO_ALLOWED_HOSTS=technofatty.com,www.technofatty.com
+DJANGO_CSRF_TRUSTED_ORIGINS=https://technofatty.com,https://www.technofatty.com
+DB_ENGINE=django.db.backends.postgresql
+DB_NAME=technofatty_dev
+DB_USER=technofatty
+DB_PASSWORD=<server-only password>
+DB_HOST=localhost
+DB_PORT=5432
+```
+
+For the current internet-facing dev deployment, `DJANGO_DEBUG=1` is intentional. Before a production hardening pass, set `DJANGO_DEBUG=0`, provide `DJANGO_SECRET_KEY`, and review:
+
+```text
+DJANGO_SESSION_COOKIE_SECURE
+DJANGO_CSRF_COOKIE_SECURE
+DJANGO_SECURE_SSL_REDIRECT
+DJANGO_SECURE_HSTS_SECONDS
+DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS
+DJANGO_SECURE_HSTS_PRELOAD
+```
+
 ## Normal Update Procedure
 
 From the app directory:
@@ -72,6 +102,9 @@ cd /var/www/technofatty/app
 git status --short
 git pull
 /var/www/technofatty/venv/bin/pip install -r requirements.txt
+set -a
+. /var/www/technofatty/app/.env
+set +a
 /var/www/technofatty/venv/bin/python manage.py check
 /var/www/technofatty/venv/bin/python manage.py migrate
 /var/www/technofatty/venv/bin/python manage.py collectstatic --noinput
@@ -81,12 +114,17 @@ sudo systemctl reload apache2
 
 Check `git status --short` first so local or user-made changes are not overwritten accidentally. If the working tree is dirty, understand the changes before pulling or deploying.
 
+The `set -a` block matters: the WSGI entrypoint loads `.env`, but plain `manage.py` commands do not automatically load it. Source `.env` before `check`, `migrate`, and `collectstatic` when you mean to operate against the live VPS settings and PostgreSQL database.
+
 ## Django Maintenance Commands
 
 Run checks:
 
 ```bash
 cd /var/www/technofatty/app
+set -a
+. /var/www/technofatty/app/.env
+set +a
 /var/www/technofatty/venv/bin/python manage.py check
 ```
 
@@ -94,6 +132,9 @@ Apply migrations:
 
 ```bash
 cd /var/www/technofatty/app
+set -a
+. /var/www/technofatty/app/.env
+set +a
 /var/www/technofatty/venv/bin/python manage.py migrate
 ```
 
@@ -101,7 +142,24 @@ Collect static files:
 
 ```bash
 cd /var/www/technofatty/app
+set -a
+. /var/www/technofatty/app/.env
+set +a
 /var/www/technofatty/venv/bin/python manage.py collectstatic --noinput
+```
+
+Deployment checklist with production-like security settings:
+
+```bash
+cd /var/www/technofatty/app
+set -a
+. /var/www/technofatty/app/.env
+set +a
+DJANGO_DEBUG=0 \
+DJANGO_SECURE_SSL_REDIRECT=1 \
+DJANGO_SECURE_HSTS_SECONDS=31536000 \
+DJANGO_SECURE_HSTS_PRELOAD=1 \
+/var/www/technofatty/venv/bin/python manage.py check --deploy
 ```
 
 ## Apache Commands
